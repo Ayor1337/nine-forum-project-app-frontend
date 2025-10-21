@@ -1,0 +1,59 @@
+.ql-toolbar {
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.ql-container {
+  border: none !important;
+  background: #fcfcfc;
+  border-radius: 5px;
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label[data-value="1"]:before,
+.ql-snow .ql-picker.ql-header .ql-picker-item[data-value="1"]:before {
+  content: "标题 1";
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label[data-value="2"]:before,
+.ql-snow .ql-picker.ql-header .ql-picker-item[data-value="2"]:before {
+  content: "标题 2";
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label[data-value="3"]:before,
+.ql-snow .ql-picker.ql-header .ql-picker-item[data-value="3"]:before {
+  content: "标题 3";
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label:before,
+.ql-snow .ql-picker.ql-header .ql-picker-item:before {
+  content: "标准";
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="small"]:before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="small"]:before {
+  content: "小号";
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label:before,
+.ql-snow .ql-picker.ql-size .ql-picker-item:before {
+  content: "正常";
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="large"]:before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="large"]:before {
+  content: "大号";
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="huge"]:before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="huge"]:before {
+  content: "巨大";
+}
+
+.ql-editor {
+  max-height: 500px;
+}
+
+.ql-editor img {
+  max-height: 200px;
+  width: auto;
+}

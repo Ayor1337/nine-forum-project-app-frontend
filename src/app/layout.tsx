@@ -1,16 +1,10 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import type { Metadata } from "next";
+import "@ant-design/v5-patch-for-react-19";
+import { unstable_ViewTransition as ViewTransition } from "react";
+import { App } from "antd";
+import { AuthProvider } from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,10 +18,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body>
+        <AntdRegistry>
+          <App>
+            <AuthProvider>
+              <ViewTransition>{children}</ViewTransition>
+            </AuthProvider>
+          </App>
+        </AntdRegistry>
       </body>
     </html>
   );
