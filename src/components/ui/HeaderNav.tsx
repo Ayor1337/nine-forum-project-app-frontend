@@ -7,10 +7,12 @@ import { BellOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { getImageUrl } from "@/axios/ImageService";
+import { useRouter } from "next/navigation";
 
 export default function HeaderNav({ width }: { width: number }) {
   const { currentUser: userInfo, isLogin, logout } = useAuth();
   const [isActive, setActive] = useState<boolean>(false);
+  const router = useRouter();
 
   return (
     <header className="z-999 bg-white/70  backdrop-blur-md shadow-sm">
@@ -77,7 +79,10 @@ export default function HeaderNav({ width }: { width: number }) {
                     >
                       个人信息
                     </Link>
-                    <div className="hover:bg-neutral-100 w-9/10 py-2 rounded-2xl text-center transition-all cursor-pointer">
+                    <div
+                      className="hover:bg-neutral-100 w-9/10 py-2 rounded-2xl text-center transition-all cursor-pointer"
+                      onClick={() => router.push("/security")}
+                    >
                       安全设置
                     </div>
                     <div

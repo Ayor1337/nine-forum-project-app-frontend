@@ -12,18 +12,22 @@ const getToken = (): getTokenResult => {
 const storeSessionToken = (token: string) => {
   if (token) {
     sessionStorage.setItem(TOKEN_KEY, token);
+    document.cookie = `Authorization=${encodeURIComponent(token)}; path=/; SameSite=Strict`;
   }
 };
 
 const storeLocalToken = (token: string) => {
   if (token) {
     localStorage.setItem(TOKEN_KEY, token);
+    document.cookie = `Authorization=${encodeURIComponent(token)}; path=/; SameSite=Strict`;
   }
 };
 
 const removeToken = () => {
   localStorage.removeItem(TOKEN_KEY);
   sessionStorage.removeItem(TOKEN_KEY);
+  // 清除 Cookie
+  document.cookie = "Authorization=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 };
 
 export { getToken, storeSessionToken, storeLocalToken, removeToken };
