@@ -19,9 +19,10 @@ interface OnlineUser {
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [sendUser, setSendUser] = useState<string>();
   const [inputMessage, setInputMessage] = useState("");
   const [ws, setWs] = useState<WebSocket | null>(null);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>()
+  const [onlineUsers, setOnlineUsers] = useState<string[]>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,8 +38,7 @@ export default function ChatPage() {
     websocket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        
-        
+        setOnlineUsers(data.message);
       } catch (error) {
         console.log("收到消息:", event.data);
       }
@@ -62,7 +62,7 @@ export default function ChatPage() {
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!ws || !inputMessage.trim()) return;
 
     const messageData = {
@@ -73,7 +73,7 @@ export default function ChatPage() {
 
     // 发送消息到服务器
     ws.send(JSON.stringify(messageData));
-    
+
     // 清空输入框
     setInputMessage("");
   };
@@ -102,14 +102,16 @@ export default function ChatPage() {
             messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
+                className={`flex ${
+                  message.sender === "user" ? "justify-end" : "justify-start"
+                }`}
               >
                 <div
-                  className={`max-w-[70%] rounded-lg p-3 ${message.sender === "user"
+                  className={`max-w-[70%] rounded-lg p-3 ${
+                    message.sender === "user"
                       ? "bg-blue-600 text-white"
                       : "bg-white shadow"
-                    }`}
+                  }`}
                 >
                   <div className="flex items-start gap-2">
                     {message.sender === "other" && (
@@ -129,10 +131,11 @@ export default function ChatPage() {
                       )}
                       <div className="mb-1">{message.content}</div>
                       <div
-                        className={`text-xs ${message.sender === "user"
+                        className={`text-xs ${
+                          message.sender === "user"
                             ? "text-blue-100"
                             : "text-gray-400"
-                          }`}
+                        }`}
                       >
                         {formatTime(message.timestamp)}
                       </div>
@@ -185,9 +188,7 @@ export default function ChatPage() {
 
         <div className="flex-1 overflow-y-auto">
           {onlineUsers?.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">
-              暂无在线用户
-            </div>
+            <div className="p-4 text-center text-gray-500">暂无在线用户</div>
           ) : (
             <div className="p-2">
               {onlineUsers?.map((user) => (
