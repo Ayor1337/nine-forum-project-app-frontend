@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Quill from "quill";
 import "quill/dist/quill.snow.css"; // 记得引入样式
 import "./style/quill.css";
-import { useRouter } from "next/navigation";
-import useApp from "antd/es/app/useApp";
+import type Quill from "quill";
 
 interface defineProps {
   onFinish: (content: string | null) => Promise<void>;
@@ -14,10 +12,7 @@ interface defineProps {
 export default function QuillTextBox({ onFinish }: defineProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const quillRef = useRef<Quill | null>(null);
-  const rootRef = useRef<HTMLDivElement | null>(null);
   const [content, setContent] = useState<string | null>(null);
-  const { message } = useApp();
-  const router = useRouter();
 
   const resetContent = () => {
     if (quillRef.current) {
@@ -27,35 +22,50 @@ export default function QuillTextBox({ onFinish }: defineProps) {
   };
 
   useEffect(() => {
-    if (containerRef.current && !quillRef.current) {
-      quillRef.current = new Quill(containerRef.current, {
-        theme: "snow",
-        placeholder: "写点什么吧...",
-        modules: {
-          toolbar: [
-            [{ header: [1, 2, 3, false] }, { size: [] }],
-            ["bold", "italic", "underline", "strike"],
-            [{ color: [] }, { background: [] }],
-            ["image"],
-          ],
-        },
-      });
+    let mounted = true;
+    let quillInstance: any;
+    let handler: (() => void) | null = null;
 
-      quillRef.current.on("text-change", () => {
-        const delta = quillRef.current?.getContents();
-        setContent(JSON.stringify(delta));
-      });
-    }
+    (async () => {
+      const Quill = (await import("quill")).default;
+
+      if (!mounted) return;
+      if (containerRef.current && !quillRef.current) {
+        quillInstance = new Quill(containerRef.current, {
+          theme: "snow",
+          placeholder: "写点什么吧...",
+          modules: {
+            toolbar: [
+              [{ header: [1, 2, 3, false] }, { size: [] }],
+              ["bold", "italic", "underline", "strike"],
+              [{ color: [] }, { background: [] }],
+              ["image"],
+            ],
+          },
+        });
+
+        handler = () => {
+          const delta = quillInstance.getContents();
+          setContent(JSON.stringify(delta));
+        };
+
+        quillInstance.on("text-change", handler);
+        quillRef.current = quillInstance;
+      }
+    })();
 
     return () => {
-      if (quillRef) {
-        rootRef.current?.remove();
+      // 不要自己删 DOM，交给 React
+      mounted = false;
+      if (quillInstance && handler) {
+        quillInstance.off("text-change", handler);
       }
+      quillRef.current = null;
     };
   }, []);
 
   return (
-    <div ref={rootRef}>
+    <div>
       <div ref={containerRef} className="min-h-30" />
       <div className="flex gap-2 justify-end mt-2 mr-2">
         <div

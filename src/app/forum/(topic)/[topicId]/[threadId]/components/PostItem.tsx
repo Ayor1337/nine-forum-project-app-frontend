@@ -1,13 +1,72 @@
 "use client";
 
+import service from "@/axios";
 import { getImageUrl } from "@/axios/ImageService";
+import { useAuth } from "@/components/AuthProvider";
 import { formatDate } from "@/func/DateConvert";
 import { quillToHTML } from "@/func/QuillToHTML";
-import { Avatar, Divider } from "antd";
+import { Avatar, Divider, Popconfirm } from "antd";
+import useApp from "antd/es/app/useApp";
 import { useRouter } from "next/navigation";
 
-export default function PostItem({ post }: { post: Post }) {
+interface defineProps {
+  post: Post;
+  handleRefresh: () => void;
+}
+
+export default function PostItem({ post, handleRefresh }: defineProps) {
   const router = useRouter();
+  const { currentUser, permissionVerify } = useAuth();
+  const { message } = useApp();
+
+  const isDeleteShow = () => {
+    if (currentUser?.accountId == post.accountId) {
+      return true;
+    }
+    return permissionVerify("", post.topicId);
+  };
+
+  const handleRemove = () => {
+    if (permissionVerify("", post.topicId)) {
+      removePost();
+    } else {
+      removePostPerm();
+    }
+  };
+
+  const removePost = async () => {
+    await service
+      .delete(`/api/post/delete`, {
+        params: {
+          post_id: post.postId,
+        },
+      })
+      .then((res) => {
+        if (res.data.code == 200) {
+          message.info("删除成功");
+          handleRefresh();
+        } else {
+          message.warning(res.data.message);
+        }
+      });
+  };
+
+  const removePostPerm = async () => {
+    await service
+      .delete(`/api/post/perm/delete`, {
+        params: {
+          post_id: post.postId,
+        },
+      })
+      .then((res) => {
+        if (res.data.code == 200) {
+          message.info("删除成功");
+        } else {
+          message.warning(res.data.message);
+        }
+      });
+  };
+
   return (
     <>
       <div className="px-4 py-3">
@@ -34,8 +93,24 @@ export default function PostItem({ post }: { post: Post }) {
 
             <div className="flex items-center justify-between text-sm mt-5">
               <div className="text-gray-500">{formatDate(post.createTime)}</div>
-              <div className="text-violet-600 hover:underline cursor-pointer">
-                回复
+              <div className="flex gap-5">
+                {isDeleteShow() && (
+                  <div>
+                    <Popconfirm
+                      title="确定删除吗？"
+                      okText="确定"
+                      cancelText="取消"
+                      onConfirm={handleRemove}
+                    >
+                      <div className="text-violet-600 hover:underline cursor-pointer">
+                        删除
+                      </div>
+                    </Popconfirm>
+                  </div>
+                )}
+                <div className="text-violet-600 hover:underline cursor-pointer">
+                  回复
+                </div>
               </div>
             </div>
           </div>

@@ -1,4 +1,7 @@
 import service from "@/axios";
+import { useAuth } from "@/components/AuthProvider";
+import SwipeableRow from "@/components/ui/SwipeableCard";
+import { AlertOutlined } from "@ant-design/icons";
 import { Popconfirm, Tag } from "antd";
 import useApp from "antd/es/app/useApp";
 import { usePathname, useRouter } from "next/navigation";
@@ -12,6 +15,7 @@ export default function AnnouncementItem({
   const pathname = usePathname();
   const router = useRouter();
   const { message } = useApp();
+  const { permissionVerify } = useAuth();
 
   const unsetAnnouncement = async () => {
     await service
@@ -28,31 +32,45 @@ export default function AnnouncementItem({
       });
   };
 
+  const EditAnnouncement = () => {
+    return (
+      <Popconfirm
+        title="确认取消公告"
+        okText="确认"
+        cancelText="不取消"
+        onConfirm={() => {
+          unsetAnnouncement();
+        }}
+      >
+        <button className="w-16 bg-red-500 rounded-2xl text-white flex flex-col items-center justify-center hover:opacity-90">
+          <span className="text-xs mt-1 text-center">取消公告</span>
+        </button>
+      </Popconfirm>
+    );
+  };
+
   return (
     <>
-      <div
-        className="flex items-center py-1 hover:bg-slate-300 rounded pl-1 transition cursor-pointer"
-        onClick={() => router.push(`${pathname}/${announcement.threadId}`)}
+      <SwipeableRow
+        actionWidth={70}
+        actions={<EditAnnouncement />}
+        canSwipe={permissionVerify("", announcement.topicId)}
       >
         <div
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
+          className="flex items-center py-1 rounded pl-1 cursor-pointer "
+          onClick={() => router.push(`${pathname}/${announcement.threadId}`)}
         >
-          <Popconfirm
-            title="确认取消公告"
-            okText="确认"
-            cancelText="不取消"
-            onConfirm={() => {
-              unsetAnnouncement();
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
             }}
           >
-            <Tag className="hover:bg-red-500! hover:text-white!">公告</Tag>
-          </Popconfirm>
-        </div>
+            <Tag>公告</Tag>
+          </div>
 
-        <div className="text-neutral-700">{announcement.title}</div>
-      </div>
+          <div className="text-neutral-700">{announcement.title}</div>
+        </div>
+      </SwipeableRow>
     </>
   );
 }

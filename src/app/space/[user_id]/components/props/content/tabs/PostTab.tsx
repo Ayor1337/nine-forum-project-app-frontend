@@ -13,7 +13,7 @@ interface defineProps {
 
 export default function PostTab({ userId }: defineProps) {
   const [page, setPage] = useState(0);
-  const [threadData, setThreadData] = useState<ThreadPages>();
+  const [threadData, setThreadData] = useState<PageEntity<Thread>>();
   const pageSize = 10;
 
   const fetchThreadsByUserId = async () => {
@@ -38,7 +38,6 @@ export default function PostTab({ userId }: defineProps) {
 
   return (
     <>
-      {" "}
       <div>
         <div className="mb-4 flex flex-wrap gap-2">
           <Select
@@ -73,7 +72,7 @@ export default function PostTab({ userId }: defineProps) {
 
         <List
           itemLayout="vertical"
-          dataSource={threadData?.threads}
+          dataSource={threadData?.data}
           renderItem={(thread) => (
             <List.Item
               key={thread.threadId}

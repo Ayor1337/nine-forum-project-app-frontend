@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 import AvatarUploadModal from "./AvatarUploadModal";
 import BannerUploadModal from "./BannerUploadModal";
+import service from "@/axios";
+import { useRouter } from "next/navigation";
 
 export default function SpaceBanner({
   userInfo,
@@ -16,14 +18,49 @@ export default function SpaceBanner({
   const [isProfileHover, setProfileHover] = useState<boolean>(false);
   const [isAvatarHover, setAvatarHover] = useState<boolean>(false);
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
-  const [bannerModalOpen, setBannerModalOpen] = useState(false);
-
+  const router = useRouter();
   const handleAvatarHover = (state: boolean) => {
-    if (isSelf) setAvatarHover(state);
+    setAvatarHover(state);
   };
 
   const handleProfileHover = (state: boolean) => {
-    if (isSelf) setProfileHover(state);
+    setProfileHover(state);
+  };
+
+  const handleTalk = async () => {
+    await service
+      .get("/api/conversation/talk", {
+        params: {
+          accountId: userInfo.accountId,
+        },
+      })
+      .then((res) => {
+        if (res.data.code == 200) {
+          if (res.data.data == null) {
+            createNewConversation();
+          } else {
+            router.push(`/message/whisper/${res.data.data.conversationId}`);
+          }
+        }
+      });
+  };
+
+  const createNewConversation = async () => {
+    await service
+      .post(
+        "/api/conversation/new",
+        {},
+        {
+          params: {
+            username: userInfo.username,
+          },
+        }
+      )
+      .then((res) => {
+        if (res.data.code == 200) {
+          router.push(`/message/whisper/${res.data.data.conversationId}`);
+        }
+      });
   };
 
   return (
@@ -66,7 +103,9 @@ export default function SpaceBanner({
                 )}
                 <motion.div
                   key="avatar"
-                  animate={{ filter: isAvatarHover ? "blur(2px)" : "none" }}
+                  animate={{
+                    filter: isAvatarHover && isSelf ? "blur(2px)" : "none",
+                  }}
                 >
                   <Avatar size={140} src={getImageUrl(userInfo?.avatarUrl)} />
                 </motion.div>
@@ -77,23 +116,47 @@ export default function SpaceBanner({
               >
                 {userInfo?.nickname}
               </motion.div>
-              <motion.div
-                key="change"
-                animate={{
-                  opacity: isProfileHover ? 1 : 0,
-                  y: -20,
-                }}
-                className="flex flex-col gap-3 items-center"
-                style={{ pointerEvents: isSelf ? "auto" : "none" }}
-              >
-                <Link
-                  href={"/"}
-                  className="text-lg text-white! hover:text-blue-300! text-shadow-2xs hover:text-shadow-sm"
+              {isSelf ? (
+                <motion.div
+                  key="change"
+                  animate={{
+                    opacity: isProfileHover ? 1 : 0,
+                    y: -20,
+                  }}
+                  className="flex flex-col gap-3 items-center"
+                  style={{ pointerEvents: isSelf ? "auto" : "none" }}
                 >
-                  修改个人资料
-                </Link>
-                <BannerUploadModal />
-              </motion.div>
+                  <Link
+                    href={"/"}
+                    className="text-lg text-white! hover:text-blue-300! text-shadow-2xs hover:text-shadow-sm"
+                  >
+                    修改个人资料
+                  </Link>
+                  <BannerUploadModal />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="change"
+                  animate={{
+                    opacity: isProfileHover ? 1 : 0,
+                    y: -20,
+                  }}
+                  className="flex gap-3 items-center h-20"
+                >
+                  <div className="text-lg py-2 px-4 rounded-2xl backdrop-blur-sm text-white cursor-pointer">
+                    关注
+                  </div>
+                  <div
+                    className="text-lg py-2 px-4 rounded-2xl backdrop-blur-sm text-white cursor-pointer"
+                    onClick={handleTalk}
+                  >
+                    私聊
+                  </div>
+                  <div className="text-lg py-2 px-4 rounded-2xl backdrop-blur-sm text-white cursor-pointer">
+                    举报
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
         </div>

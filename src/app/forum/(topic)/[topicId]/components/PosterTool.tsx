@@ -12,7 +12,7 @@ import {
 import { Button, Divider, Input } from "antd";
 import useApp from "antd/es/app/useApp";
 import { AnimatePresence, motion, px } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { ThreadWrapperRef } from "./ThreadCard";
 
 interface defineProps {
@@ -52,13 +52,27 @@ export default function PosterTool({ topicId, refresh }: defineProps) {
       });
   };
 
-  window.addEventListener("scroll", () => {
-    if (window.pageYOffset > 800) {
-      setScroll(true);
+  useEffect(() => {
+    window.addEventListener("scroll", () => {
+      if (window.pageYOffset > 800) {
+        setScroll(true);
+      } else {
+        setScroll(false);
+      }
+    });
+
+    return () => {
+      window.removeEventListener("scroll", () => {});
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isActive) {
+      document.body.style.overflow = "hidden";
     } else {
-      setScroll(false);
+      document.body.style.overflow = "auto";
     }
-  });
+  }, [isActive]);
 
   return (
     <div>

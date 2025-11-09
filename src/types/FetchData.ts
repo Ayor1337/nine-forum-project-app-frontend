@@ -1,3 +1,8 @@
+interface PageEntity<T> {
+  totalSize: number;
+  data: Array<T>;
+}
+
 interface Topic {
   topicId: number;
   title: string;
@@ -57,9 +62,18 @@ interface Thread {
   tag: Tag;
 }
 
-interface ThreadPages {
-  totalSize: number;
-  threads: Array<Thread>;
+interface UserMessage {
+  userInfo: UserInfo;
+  message: ChatboardHistory;
+}
+
+interface ChatboardHistory {
+  chatboardHistoryId: number;
+  accountId: number;
+  username: string;
+  topicId: number;
+  content: string;
+  createTime: Date;
 }
 
 interface Announcement {
@@ -81,6 +95,30 @@ interface Post {
   avatarUrl: string;
   nickname: string;
   createTime: Date;
+  topicId: number;
+  threadId: number;
+}
+
+interface Conversation {
+  conversationId: number;
+  userInfo: UserInfo;
+  updateTime: Date;
+}
+
+interface ConversationMessage {
+  conversationMessageId: number;
+  content: string;
+  accountId: number;
+  avatarUrl: string;
+  createTime: Date;
+  updateTime: Date;
+  isEdit: boolean;
+}
+
+interface ChatUnread {
+  conversationId: number;
+  fromUserId: number;
+  unread: number;
 }
 
 interface Tag {

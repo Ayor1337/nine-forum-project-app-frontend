@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import service from "@/axios";
 import { usePathname, useRouter } from "next/navigation";
 import AnnouncementItem from "./AnnouncementItem";
+import ChatBoard from "./ChatBoard";
 
 export default function ThreadWrapper({ topicId }: { topicId: string }) {
   const threadWrapperRef = useRef<ThreadWrapperRef>(null);
@@ -50,7 +51,7 @@ export default function ThreadWrapper({ topicId }: { topicId: string }) {
 
         {/* Announcement Start */}
         {announcements && announcements.length > 0 && (
-          <div className="rounded-xl border border-black/5 bg-white shadow-sm hover:shadow-md transition p-3">
+          <div className="rounded-xl border border-black/5 bg-white shadow-sm hover:shadow-md transition p-3 overflow-hidden">
             <div className="space-y-1.5">
               {announcements?.map((a) => (
                 <AnnouncementItem announcement={a} key={a.threadId} />
@@ -61,11 +62,18 @@ export default function ThreadWrapper({ topicId }: { topicId: string }) {
 
         {/* Announcement End */}
 
-        {/* Content Start */}
+        {/* ChatBoard Start */}
         <div className="relative">
           <div className="fixed -translate-x-15 z-99">
             <PosterTool topicId={topicId} refresh={updateDataHandler} />
           </div>
+          <ChatBoard topicId={topicId} />
+        </div>
+
+        {/* ChatBoard End */}
+
+        {/* Content Start */}
+        <div className="relative">
           <ThreadCard topicId={Number(topicId)} ref={threadWrapperRef} />
         </div>
 

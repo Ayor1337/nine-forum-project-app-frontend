@@ -1,0 +1,11 @@
+.scroller {
+  --scrollbar-color-track: #0000ff00;
+  --scrollbar-color-thumb: #90a1b9;
+}
+
+@supports (scrollbar-width: auto) {
+  .scroller {
+    scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
+    scrollbar-width: thin;
+  }
+}

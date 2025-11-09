@@ -4,27 +4,48 @@ import { Button, Card } from "antd";
 import Link from "next/link";
 import "@ant-design/v5-patch-for-react-19";
 import Footer from "@/components/ui/Footer";
+import LiveWidget from "@/components/ui/LiveWidget";
+import { getImageUrl } from "@/axios/ImageService";
+import { useRouter } from "next/navigation";
+import service from "@/axios";
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleEnter = async () => {
+    await service
+      .get("/")
+      .then((res) => {
+        router.push("/forum");
+      })
+      .catch((err) => {
+        router.push("/error/network");
+      });
+  };
+
   return (
     <div>
       {/* 主页Banner start */}
       <div className="relative w-full h-120">
-        <div className="h-120 overflow-hidden">
-          <img src="/banner.png" className="size-full object-cover " alt="" />
+        <div className="h-120 overflow-hidden relative">
+          <img
+            src={getImageUrl("nineforum/static/banner.png")}
+            className="size-full object-cover absolute bottom-0"
+            alt=""
+          />
         </div>
         {/* 登录按钮 start */}
         <div className="absolute bottom-0 flex flex-col items-center w-full group ">
-          <Link
-            href={"/forum"}
-            className="group group-pointer w-full text-center z-10"
+          <div
+            onClick={handleEnter}
+            className="group group-pointer w-full text-center z-10 cursor-pointer"
           >
             <div className="px-20 py-7 bg-transparent  group-hover:bg-blue-600 transition-all">
-              <div className="group-hover:text-blue-300 text-shadow-lg transition-all text-4xl text-white">
+              <div className="text-shadow-lg transition-all text-4xl text-white">
                 进入论坛
               </div>
             </div>
-          </Link>
+          </div>
           <Link
             className="text-sm! w-full! text-center bg-transparent! py-4 text-neutral-600! hover:text-neutral-800! hover:font-bold! transition-all! absolute top-full group group-hover:-translate-0! group-hover:bg-neutral-700/15! -translate-y-15! -z-10! group-hover:z-999!"
             href={"/register"}

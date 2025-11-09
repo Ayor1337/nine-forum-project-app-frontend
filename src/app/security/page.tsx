@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { Tabs, App } from "antd";
+import ActivitySection from "./components/ActivitySection";
 import PasswordSection from "./components/PasswordSection";
-import TwoFactorSection from "./components/TwoFactorSection";
 import PrivacySection from "./components/PrivacySection";
 import SessionsSection from "./components/SessionsSection";
-import ActivitySection from "./components/ActivitySection";
+import TwoFactorSection from "./components/TwoFactorSection";
 
 const tabs = [
   {
@@ -22,7 +22,7 @@ const tabs = [
   {
     key: "privacy",
     label: "隐私设置",
-     children: <PrivacySection />,
+    children: <PrivacySection />,
   },
   {
     key: "sessions",
@@ -40,20 +40,18 @@ export default function SecurityPage() {
   const [activeTab, setActiveTab] = useState("password");
 
   return (
-    <App>
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto py-8 px-4">
-          <div className="bg-white rounded-lg shadow">
-            <Tabs
-              activeKey={activeTab}
-              onChange={setActiveTab}
-              tabPosition="left"
-              items={tabs}
-              className="min-h-[600px]"
-            />
-          </div>
+    <div>
+      <div className="w-[1200px] mx-auto py-8 px-4">
+        <div className="bg-white">
+          <Tabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            tabPosition="left"
+            items={tabs}
+            className="min-h-[600px]"
+          />
         </div>
       </div>
-    </App>
+    </div>
   );
 }

@@ -1,25 +1,5 @@
-import service from "@/axios";
-import { useAuth } from "@/components/AuthProvider";
-import { formatDate } from "@/func/DateConvert";
-import { quillToHTML } from "@/func/QuillToHTML";
-import { EyeOutlined, MessageOutlined, LikeOutlined } from "@ant-design/icons";
-import {
-  Card,
-  Tabs,
-  Select,
-  Input,
-  List,
-  Tag,
-  Pagination,
-  Empty,
-  Divider,
-  Button,
-  Popover,
-  Popconfirm,
-} from "antd";
-import useApp from "antd/es/app/useApp";
-import Link from "next/link";
-import { useState, useMemo, useEffect } from "react";
+import { Card, Tabs } from "antd";
+import { useState } from "react";
 import PostTab from "./tabs/PostTab";
 import LikesTab from "./tabs/LikesTab";
 import CollectTab from "./tabs/CollectTab";

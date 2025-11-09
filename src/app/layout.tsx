@@ -5,6 +5,7 @@ import "@ant-design/v5-patch-for-react-19";
 import { unstable_ViewTransition as ViewTransition } from "react";
 import { App } from "antd";
 import { AuthProvider } from "@/components/AuthProvider";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Create Next App",

@@ -13,8 +13,8 @@ interface defineProps {
 
 export default function LikesTab({ userId }: defineProps) {
   const [page, setPage] = useState(0);
-  const pageSize = 10;
-  const [likeThreadData, setLikeThreadData] = useState<ThreadPages>();
+  const pageSize = 1;
+  const [likeThreadData, setLikeThreadData] = useState<PageEntity<Thread>>();
   const { message } = useApp();
 
   const fetchLikeThreadsByUserId = async () => {
@@ -98,7 +98,7 @@ export default function LikesTab({ userId }: defineProps) {
 
         <List
           itemLayout="horizontal"
-          dataSource={likeThreadData?.threads}
+          dataSource={likeThreadData?.data}
           renderItem={(thread) => (
             <List.Item
               actions={[

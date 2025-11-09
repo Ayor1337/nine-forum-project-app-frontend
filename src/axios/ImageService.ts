@@ -1,4 +1,4 @@
-const baseURL = "http://localhost:9000";
+const baseURL = process.env.NEXT_PUBLIC_RES_URL;
 
 const getImageUrl = (url?: string) => {
   if (url == null) return `${baseURL}/nineforum/fallback.png`;

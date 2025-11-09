@@ -5,7 +5,7 @@ import { formatDate } from "@/func/DateConvert";
 import { quillToHTML } from "@/func/QuillToHTML";
 import { Image, Tag } from "antd";
 import { usePathname, useRouter } from "next/navigation";
-import EditTool from "./EditTool";
+import EditTool from "./ThreadActions";
 import { useAuth } from "@/components/AuthProvider";
 import {
   EyeOutlined,
@@ -13,6 +13,8 @@ import {
   MessageOutlined,
   StarOutlined,
 } from "@ant-design/icons";
+import React from "react";
+import SwipeableRow from "@/components/ui/SwipeableCard";
 
 export default function ThreadItem({ thread }: { thread: Thread }) {
   const pathname = usePathname();
@@ -20,25 +22,31 @@ export default function ThreadItem({ thread }: { thread: Thread }) {
   const { permissionVerify } = useAuth();
 
   return (
-    <>
-      <div>
-        <div className="relative flex flex-col gap-3  rounded-lg  ">
+    <div>
+      <SwipeableRow
+        actions={
+          <EditTool thread={thread} topicId={thread.topicId} tag={thread.tag} />
+        }
+        actionWidth={300}
+        canSwipe={permissionVerify("", thread.topicId)}
+        className="overflow-hidden"
+      >
+        {/* ====== 下面保持你原来的内容结构，仅把整个卡片作为 children 传入 ====== */}
+        <div className="relative flex flex-col gap-3">
           {/* UserInfo Start */}
           <div
-            className=" flex items-center px-3 pt-3 cursor-pointer group"
+            className="flex items-center px-3 pt-3 cursor-pointer group"
             onClick={() => {
               router.push(`/space/${thread.accountId}`);
             }}
           >
-            {/* 用户头像 start */}
+            {/* 头像 */}
             <img
               className="size-12 rounded-full object-cover"
               src={getImageUrl(thread.avatarUrl)}
-            ></img>
-            {/* 用户头像 end */}
-
-            {/* 用户名 start */}
-            <div className="ml-2 leading-tight ">
+            />
+            {/* 名称与时间 */}
+            <div className="ml-2 leading-tight">
               <div className="font-medium text-neutral-900 group-hover:text-blue-600">
                 {thread.accountName}
               </div>
@@ -46,20 +54,9 @@ export default function ThreadItem({ thread }: { thread: Thread }) {
                 {formatDate(thread.createTime)}
               </div>
             </div>
-            {/* 用户名 end */}
-
-            {/* 管理工具 start  */}
-            {permissionVerify("", thread.topicId) && (
-              <EditTool
-                topicId={thread.topicId}
-                tag={thread.tag}
-                thread={thread}
-              />
-            )}
-
-            {/* 管理工具 end  */}
           </div>
-          {/* 标题 */}
+
+          {/* 标题 + 标签 */}
           <div
             className="group px-3 cursor-pointer"
             onClick={(e) => {
@@ -74,7 +71,7 @@ export default function ThreadItem({ thread }: { thread: Thread }) {
               </div>
             </div>
 
-            {/* 摘要 + 图片 */}
+            {/* 摘要 */}
             <div className="flex flex-col gap-3">
               <div
                 className="text-sm text-neutral-700 leading-6 line-clamp-3"
@@ -84,12 +81,14 @@ export default function ThreadItem({ thread }: { thread: Thread }) {
               />
             </div>
           </div>
+
+          {/* 图片区 */}
           <div className="grid grid-cols-3 gap-4 px-3">
             {thread.imageUrls.map((url) => (
               <Image
                 src={getImageUrl(url)}
                 key={url}
-                className="max-h-30 object-cover "
+                className="max-h-30 object-cover"
                 preview={{
                   zIndex: 101,
                   mask: (
@@ -101,7 +100,9 @@ export default function ThreadItem({ thread }: { thread: Thread }) {
               />
             ))}
           </div>
-          <div className="flex self-end gap-5 px-10 items-center">
+
+          {/* 统计区 */}
+          <div className="flex self-end gap-5 px-10 items-center pb-3">
             <div className="flex gap-1 items-center">
               <EyeOutlined />
               <div>{thread.viewCount}</div>
@@ -120,7 +121,8 @@ export default function ThreadItem({ thread }: { thread: Thread }) {
             </div>
           </div>
         </div>
-      </div>
-    </>
+        {/* ====== /原内容 ====== */}
+      </SwipeableRow>
+    </div>
   );
 }

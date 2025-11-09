@@ -40,14 +40,19 @@ export function AuthProvider({
 
   const getUserInfo = async (token: string | null) => {
     if (token != null) {
-      await service.get("/api/user/info").then((res) => {
-        if (res.data.code == 200) {
-          setUserInfo(res.data.data);
-          setLogin(true);
-        } else {
-          message.warning(res.data.message);
-        }
-      });
+      await service
+        .get("/api/user/info")
+        .then((res) => {
+          if (res.data.code == 200) {
+            setUserInfo(res.data.data);
+            setLogin(true);
+          } else {
+            message.warning(res.data.message);
+          }
+        })
+        .catch((e) => {
+          message.error("服务器出现异常, 这不是你的错");
+        });
     }
   };
 

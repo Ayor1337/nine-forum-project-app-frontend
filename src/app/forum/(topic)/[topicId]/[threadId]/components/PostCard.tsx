@@ -402,7 +402,11 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
 
           {/* Message Box End */}
           {posts?.map((pm) => (
-            <PostItem post={pm} key={pm.postId} />
+            <PostItem
+              post={pm}
+              key={pm.postId}
+              handleRefresh={() => fetchPostsByThreadId(Number(threadId))}
+            />
           ))}
         </div>
         {/* Post Reply End  */}

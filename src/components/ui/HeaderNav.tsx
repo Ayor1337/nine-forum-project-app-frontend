@@ -2,24 +2,96 @@
 
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
-import { Avatar } from "antd";
+import { Avatar, Badge, Button, Drawer } from "antd";
 import { BellOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { getImageUrl } from "@/axios/ImageService";
 import { useRouter } from "next/navigation";
+import MessageWrapper from "../chat/MessageWrapper";
+import { Client, IMessage } from "@stomp/stompjs";
+import { getToken } from "@/axios/Authorization";
+import service from "@/axios";
 
-export default function HeaderNav({ width }: { width: number }) {
-  const { currentUser: userInfo, isLogin, logout } = useAuth();
+export default function HeaderNav() {
+  const { currentUser, isLogin, logout } = useAuth();
   const [isActive, setActive] = useState<boolean>(false);
+  const [isNotiHover, setNotiHover] = useState<boolean>(false);
+  const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false);
+  const [client, setClient] = useState<Client | null>(null);
+  const [systemUnread, setSystemUnread] = useState<number>(0);
+  const [userUnread, setUserUnread] = useState<number>(0);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
   const router = useRouter();
 
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
+
+  const fetchUnreadMessage = async () => {
+    await service.get("/api/notif/remaining_message_unread").then((res) => {
+      if (res.data.code == 200) {
+        setUnreadCount(res.data.data.unread);
+      }
+    });
+  };
+
+  const fetchUnreadMessageItem = async (type: string) => {
+    await service
+      .get(`/api/notif/remaining_message_unread`, {
+        params: { type: type },
+      })
+      .then((res) => {
+        if (res.data.code == 200) {
+          if (type == "system") {
+            setSystemUnread(res.data.data.unread);
+          } else if (type == "user") {
+            setUserUnread(res.data.data.unread);
+          }
+        }
+      });
+  };
+
+  useEffect(() => {
+    fetchUnreadMessage();
+    fetchUnreadMessageItem("system");
+    fetchUnreadMessageItem("user");
+  }, []);
+
+  useEffect(() => {
+    const client = new Client({
+      brokerURL: `ws://${process.env.NEXT_PUBLIC_WS_URL}/system`,
+      connectHeaders: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+      reconnectDelay: 2000,
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
+      onConnect: () => {
+        setClient(client);
+        client.subscribe("/user/notif/unread", (message: IMessage) => {
+          setUnreadCount(JSON.parse(message.body).unread);
+        });
+        setClient(client);
+        client.subscribe("/user/notif/unread/system", (message: IMessage) => {
+          setSystemUnread(JSON.parse(message.body).unread);
+        });
+        client.subscribe("/user/notif/unread/user", (message: IMessage) => {
+          setUserUnread(JSON.parse(message.body).unread);
+        });
+      },
+    });
+
+    client.activate();
+
+    return () => {
+      client.deactivate();
+    };
+  }, []);
+
   return (
-    <header className="z-999 bg-white/70  backdrop-blur-md shadow-sm">
-      <div
-        className="max-w-7xl mx-auto flex justify-between items-center px-6"
-        style={{ width }}
-      >
+    <div className="z-999 bg-white/70 w-full backdrop-blur-md shadow-sm">
+      <div className="max-w-[1200px] mx-auto flex justify-between items-center px-3">
         {/* 左侧导航 */}
         <nav className="flex gap-6">
           <Link href="/" className="header-nav-link">
@@ -38,7 +110,38 @@ export default function HeaderNav({ width }: { width: number }) {
           <div className="relative">
             <AnimatePresence initial={false}>
               <div className="flex items-center gap-5">
-                <BellOutlined className="text-lg" />
+                <div
+                  className="size-8 relative flex justify-center items-center rounded-full group hover:bg-neutral-200 transition"
+                  onClick={() => setDrawerOpen(true)}
+                  onMouseEnter={() => setNotiHover(true)}
+                  onMouseLeave={() => setNotiHover(false)}
+                >
+                  <Badge count={unreadCount}>
+                    <BellOutlined className="text-lg" />
+                  </Badge>
+
+                  <motion.div
+                    key="noti-dropdown"
+                    className="overflow-hidden absolute shadow-lg rounded-2xl w-34 top-10 bg-white"
+                    initial={{ height: 0 }}
+                    animate={{ height: isNotiHover ? "auto" : 0 }}
+                  >
+                    <div className="flex flex-col px-1 py-2 gap-1  ">
+                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition">
+                        <div>我的回复</div>
+                        <Badge count={0} />
+                      </div>
+                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition">
+                        <div>系统通知</div>
+                        <Badge count={systemUnread} />
+                      </div>
+                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition">
+                        <div>我的消息</div>
+                        <Badge count={userUnread} />
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
                 <motion.div
                   key="avatar"
                   initial={{ scale: 1, y: 0 }}
@@ -49,11 +152,11 @@ export default function HeaderNav({ width }: { width: number }) {
                   onMouseEnter={() => setActive(true)}
                   onMouseLeave={() => setActive(false)}
                 >
-                  <Avatar src={getImageUrl(userInfo?.avatarUrl)} />
+                  <Avatar src={getImageUrl(currentUser?.avatarUrl)} />
                 </motion.div>
               </div>
               <motion.div
-                key="dropdown"
+                key="user-dropdown"
                 initial={{ opacity: 0 }}
                 animate={{
                   opacity: isActive ? 1 : 0,
@@ -67,14 +170,14 @@ export default function HeaderNav({ width }: { width: number }) {
               >
                 <div className="pt-1 pb-5 px-2 w-full h-full flex flex-col items-center">
                   <div className="mb-10 self-start text-lg">
-                    {userInfo?.nickname}
+                    {currentUser?.nickname}
                   </div>
                   <div
                     className="flex flex-col
                    items-center flex-1 justify-between w-full gap-2 "
                   >
                     <Link
-                      href={"/space/" + userInfo?.accountId}
+                      href={"/space/" + currentUser?.accountId}
                       className="hover:bg-neutral-100! text-black! w-9/10 py-2 rounded-2xl text-center transition-all cursor-pointer"
                     >
                       个人信息
@@ -107,6 +210,22 @@ export default function HeaderNav({ width }: { width: number }) {
           </div>
         )}
       </div>
-    </header>
+
+      <Drawer
+        title="通知消息"
+        open={isDrawerOpen}
+        onClose={handleDrawerClose}
+        extra={
+          <>
+            <Button onClick={() => router.push("/message")}>
+              在新的标签页打开
+            </Button>
+          </>
+        }
+        width={1000}
+      >
+        <MessageWrapper />
+      </Drawer>
+    </div>
   );
 }

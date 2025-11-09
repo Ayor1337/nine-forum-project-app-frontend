@@ -11,14 +11,14 @@ interface defineProps {
 
 export default function CollectTab({ userId }: defineProps) {
   const [page, setPage] = useState(0);
-  const [collectThreadData, setCollectThreadData] = useState<ThreadPages>();
-  const { message } = useApp();
+  const [collectThreadData, setCollectThreadData] =
+    useState<PageEntity<Thread>>();
 
   const pageSize = 8;
 
   const fetchCollectThreadsByUserId = async () => {
     await service
-      .get(`/api/like/get_likes`, {
+      .get(`/api/collect/get_collects`, {
         params: {
           user_id: userId,
           page: page,
@@ -39,13 +39,12 @@ export default function CollectTab({ userId }: defineProps) {
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* TODO: 接入收藏列表 */}
-        {collectThreadData && collectThreadData.threads.length === 0 ? (
+        {collectThreadData && collectThreadData.data.length === 0 ? (
           <div className="col-span-full">
             <Empty description="暂无收藏" />
           </div>
         ) : (
-          collectThreadData?.threads.map((fav) => (
+          collectThreadData?.data.map((fav) => (
             <Card key={fav.threadId} className="rounded-2xl">
               <div className="flex items-start justify-between gap-3">
                 <div>

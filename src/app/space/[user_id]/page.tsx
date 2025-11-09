@@ -1,4 +1,4 @@
-import Footer from "@/components/ui/Footer";
+
 import SpaceWrapper from "./components/SpaceWrapper";
 
 export default async function SpacePage({

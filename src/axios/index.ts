@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getToken } from "./Authorization";
 const service = axios.create({
-  baseURL: "http://localhost:9966",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 5000,
 });
 

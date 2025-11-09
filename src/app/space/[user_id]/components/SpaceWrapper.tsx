@@ -6,7 +6,6 @@ import SpaceBanner from "./props/SpaceBanner";
 import { useAuth } from "@/components/AuthProvider";
 import StatisticsWrapper from "./props/StatisticsWrapper";
 import UserContentWrapper from "./props/content/UserContentWrapper";
-import Footer from "@/components/ui/Footer";
 
 export default function SpaceWrapper({ user_id }: { user_id: string }) {
   const [isSelf, setSelf] = useState<boolean>(false);
@@ -47,9 +46,6 @@ export default function SpaceWrapper({ user_id }: { user_id: string }) {
         {/* 顶部快捷操作 */}
         <StatisticsWrapper />
         <UserContentWrapper userId={user_id} />
-        <div className="mt-4">
-          <Footer />
-        </div>
       </div>
     </div>
   ) : (

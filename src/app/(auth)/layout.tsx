@@ -9,8 +9,8 @@ export default function AuthLayout({
   return (
     <div className="w-dvw h-dvh flex justify-center items-center">
       <div className="bg-red-300 h-160 w-340 flex shadow-2xl">
+        {/* 待插入背景图 */}
         <div className="flex-1/3"></div>
-
         <div className="flex-2/3 bg-white flex justify-center items-center overflow-hidden relative">
           <div className="absolute top-3 left-3 flex items-center">
             <Link href="/forum">
