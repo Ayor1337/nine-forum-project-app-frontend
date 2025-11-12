@@ -127,7 +127,6 @@ export default function WhisperMessageContentWrapper({
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
       onConnect: () => {
-        setClient(client);
         client.subscribe(
           `/user/transfer/conversation/${conversationId}`,
           (message: IMessage) => {
