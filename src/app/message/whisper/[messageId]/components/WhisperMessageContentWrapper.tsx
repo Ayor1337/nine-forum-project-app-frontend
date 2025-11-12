@@ -2,13 +2,16 @@
 
 import service from "@/axios";
 import { getToken } from "@/axios/Authorization";
-import { getImageUrl } from "@/axios/ImageService";
 import { useAuth } from "@/components/AuthProvider";
 import { Client, IMessage } from "@stomp/stompjs";
 import useApp from "antd/es/app/useApp";
-import { use, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./scroll.css";
-import VirtualList, { ListRef } from "rc-virtual-list";
+import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
+import { getImageUrl } from "@/axios/ImageService";
+import { Image } from "antd";
+import { ChatMessage } from "./chat";
+import { formatSmartTime } from "@/func/DateConvert";
 
 interface defineProps {
   conversationId: number;
@@ -17,25 +20,24 @@ interface defineProps {
 export default function WhisperMessageContentWrapper({
   conversationId,
 }: defineProps) {
+  const PAGE_SIZE = 20;
+
   const [content, setContent] = useState<string>("");
-  const [conversationMessages, setConversationMessages] =
-    useState<PageEntity<ConversationMessage>>();
-  const [client, setClient] = useState<Client | null>(null);
-  const { message } = useApp();
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const { message: antdMessage } = useApp();
+  const virtuosoRef = useRef<VirtuosoHandle | null>(null);
   const { currentUser } = useAuth();
-  const listRef = useRef<ListRef>(null);
   const [page, setPage] = useState<number>(1);
+  const [firstItemIndex, setFirstItemIndex] = useState(Number.MAX_SAFE_INTEGER);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [isInit, setInit] = useState<boolean>(false);
-  const [topHeight, setTopHeight] = useState<number>(0);
+  const [autoFollow, setAutoFollow] = useState(true);
 
-  const CONTAINER_HEIGHT = 480;
-
-  const isSender = (accoundId: number) => {
-    if (currentUser) {
-      return currentUser.accountId == accoundId;
-    }
-  };
+  const isSender = useCallback(
+    (accoundId: number) => {
+      return currentUser ? currentUser.accountId === accoundId : false;
+    },
+    [currentUser]
+  );
 
   const sendMessage = async () => {
     if (content.trim() == "") {
@@ -53,69 +55,176 @@ export default function WhisperMessageContentWrapper({
         if (res.data.code == 200) {
           setContent("");
         } else {
-          message.warning(res.data.message);
+          antdMessage.warning(res.data.message);
         }
       });
   };
 
-  const addConversationMessages = async (message: ConversationMessage) => {
-    if (message) {
-      setConversationMessages((prevMessages) => {
-        if (prevMessages) {
-          return {
-            totalSize: prevMessages.totalSize + 1,
-            data: [message, ...prevMessages.data],
-          };
-        } else {
-          return {
-            totalSize: 1,
-            data: [message],
-          };
+  const appendMessage = useCallback((message: ConversationMessage) => {
+    setChatMessages((prevMessages) => {
+      const prevArr = prevMessages ?? [];
+      // 计算下一个递减索引：首条是 -1，之后每次 -1
+      const nextIndex =
+        prevArr.length === 0
+          ? -1
+          : (prevArr[prevArr.length - 1].index ?? -1) - 1;
+
+      // 尾插，不改原数组
+      return [...prevArr, { index: nextIndex, message }];
+    });
+  }, []);
+
+  // 改函数签名：接收 pageNo
+  const fetchConversationHistory = useCallback(
+    async (pageNo: number) => {
+      const res = await service.get("/api/conversation/message/list", {
+        params: { conversationId, page_num: pageNo },
+      });
+
+      if (res.data.code !== 200) return;
+
+      const pageEntity: PageEntity<ConversationMessage> = res.data.data;
+      const list = pageEntity.data;
+      list.reverse();
+
+      // 批量前置（保持你 ChatMessage 的结构）
+      setChatMessages((prev) => {
+        const prevArr = prev ?? [];
+        const seen = new Set(
+          prevArr.map((x) => x.message.conversationMessageId)
+        );
+
+        // 过滤掉已经存在的
+        const fresh = list.filter(
+          (msg) => !seen.has(msg.conversationMessageId)
+        );
+
+        if (fresh.length === 0) {
+          return prevArr; // 没有新增，直接返回旧的，避免多余 render
         }
+
+        // 映射成你的 ChatMessage 结构（index 仅保留，不作为 key）
+        const mapped: ChatMessage[] = fresh.map((msg, i) => ({
+          message: msg,
+          index: prevArr.length + list.length - i,
+        }));
+
+        // 头插：新老顺序保持不变
+        return [...mapped, ...prevArr];
       });
-    }
-  };
 
-  const fetchConversationHistory = async (id: number) => {
-    await service
-      .get("/api/conversation/message/list", {
-        params: {
-          conversationId: id,
-          page_num: page,
-        },
-      })
-      .then((res) => {
-        if (res.data.code == 200) {
-          let pageEntity: PageEntity<ConversationMessage> = res.data.data;
-          console.log("查询一次");
-
-          if (page * 20 >= res.data.data.totalSize) {
-            console.log("结束了");
-            setHasMore(false);
-          }
-          pageEntity.data.forEach((message) => {
-            addConversationMessages(message);
-          });
-        }
-      });
-  };
-
-  const onScroll = (e: React.UIEvent<HTMLElement, UIEvent>) => {
-    const el = listRef.current?.getScrollInfo();
-
-    if (!el) return;
-
-    if (el.y <= 0 && hasMore) {
-      // console.log(topHeight);
-      listRef.current?.scrollTo({
-        top: Math.abs(e.currentTarget.scrollHeight - topHeight),
-      });
-      setPage(page + 1);
-      if (hasMore) {
-        fetchConversationHistory(conversationId);
+      // 🔑 一次性扣减 firstItemIndex（按实际条数）
+      if (list.length > 0) {
+        setFirstItemIndex((v) => v - list.length);
       }
-    }
-  };
+
+      // hasMore
+      if (pageNo * PAGE_SIZE >= pageEntity.totalSize) {
+        setHasMore(false);
+      }
+    },
+    [conversationId]
+  );
+
+  const getPrevMessage = useCallback(
+    (index: number) => {
+      if (chatMessages == null) return null;
+      if (chatMessages.length < 1) return null;
+
+      const prevMessage = chatMessages
+        .filter((x) => x.index === index + 1)
+        .at(0);
+      return prevMessage;
+    },
+    [chatMessages]
+  );
+
+  const itemContent = useCallback(
+    (index: number, message: ChatMessage) => {
+      if (!message) return null;
+
+      const chatMessage = message.message;
+
+      if (!chatMessage) return null;
+
+      // 用回调的 index 拿上一条，避免用 message.index 造成错位
+      const prev = getPrevMessage(message.index)?.message;
+
+      const isMine = isSender(chatMessage.accountId);
+      const isNewBlock = !prev || prev.accountId !== chatMessage.accountId;
+      const showAvatar =
+        !prev || prev.avatarUrl !== chatMessage.avatarUrl || isNewBlock;
+      let longTimeNoSee;
+      if (prev) {
+        longTimeNoSee = formatSmartTime(
+          prev.createTime,
+          chatMessage.createTime
+        );
+      }
+
+      const wrapperClass = isMine
+        ? `flex pr-3 flex-1 items-center justify-end${
+            isNewBlock ? " mt-2" : ""
+          }`
+        : `flex items-center${isNewBlock ? " mt-2" : ""}`;
+
+      const bubbleClass = isMine
+        ? "mr-3 ml-13 px-4 py-2 bg-green-400 text-white rounded-2xl"
+        : "ml-3 mr-13 px-4 py-2 bg-slate-400 text-white rounded-2xl";
+
+      // 更通用：用 w-10 h-10，避免 `size-10!` 这种写法
+      const avatarClass = "size-10! rounded-full flex-shrink-0";
+
+      return (
+        <div>
+          {longTimeNoSee && (
+            <div className="flex flex-1 justify-center">{longTimeNoSee}</div>
+          )}
+          <div className="flex flex-1">
+            <div className={wrapperClass}>
+              {!isMine &&
+                (showAvatar ? (
+                  <Image
+                    alt=""
+                    src={getImageUrl(chatMessage.avatarUrl)}
+                    className={avatarClass}
+                    preview={false}
+                  />
+                ) : (
+                  <div className="w-10 h-10 flex-shrink-0" />
+                ))}
+
+              <div className={bubbleClass}>{chatMessage.content}</div>
+
+              {isMine &&
+                (showAvatar ? (
+                  <Image
+                    alt=""
+                    src={getImageUrl(chatMessage.avatarUrl)}
+                    className={avatarClass}
+                    preview={false}
+                  />
+                ) : (
+                  <div className="w-10 h-10 flex-shrink-0" />
+                ))}
+            </div>
+          </div>
+        </div>
+      );
+    },
+    [isSender, getPrevMessage]
+  );
+
+  const handleLoadMore = useCallback(async () => {
+    if (!hasMore) return;
+    const next = page + 1;
+    setPage(next);
+    await fetchConversationHistory(next); // ← 传入下一页
+  }, [hasMore, page, fetchConversationHistory]);
+
+  useEffect(() => {
+    fetchConversationHistory(1);
+  }, [fetchConversationHistory]);
 
   useEffect(() => {
     const client = new Client({
@@ -130,13 +239,11 @@ export default function WhisperMessageContentWrapper({
         client.subscribe(
           `/user/transfer/conversation/${conversationId}`,
           (message: IMessage) => {
-            addConversationMessages(JSON.parse(message.body));
-            message.ack();
+            appendMessage(JSON.parse(message.body));
           }
         );
       },
-      onStompError: (error) => {
-        message.error("连接出现异常, 请刷新重新连接");
+      onStompError: () => {
         client.deactivate();
       },
     });
@@ -146,96 +253,29 @@ export default function WhisperMessageContentWrapper({
     return () => {
       client.deactivate();
     };
-  }, [conversationId]);
-
-  useEffect(() => {
-    fetchConversationHistory(conversationId);
-  }, [conversationId]);
-
-  useLayoutEffect(() => {
-    if (!isInit) {
-      const len = conversationMessages?.data?.length ?? 0;
-      if (!len) return;
-      // 方案A：按索引定位到底
-      listRef.current?.scrollTo({ index: len - 1, align: "bottom" });
-      // 方案B：像素制兜底（部分旧版更稳）
-      listRef.current?.scrollTo(Number.MAX_SAFE_INTEGER);
-      setInit(true);
-    }
-  }, [conversationMessages?.data?.length]);
+  }, [conversationId, appendMessage]);
 
   return (
-    conversationMessages && (
-      <div className="max-h-full">
-        <VirtualList
-          data={conversationMessages.data}
-          itemKey="conversationMessageId"
-          height={CONTAINER_HEIGHT}
-          itemHeight={60}
-          onScroll={onScroll}
-          ref={listRef}
-          className="flex flex-col scroller pr-1"
-        >
-          {(message, index) => (
-            <div className="flex flex-1" key={message.conversationMessageId}>
-              {isSender(message.accountId) ? (
-                <div
-                  className={
-                    "flex flex-1 items-center justify-end" +
-                    (index > 0 &&
-                    conversationMessages.data[index - 1].accountId !=
-                      message.accountId
-                      ? " mt-2"
-                      : "")
-                  }
-                >
-                  <div className="mr-3 ml-13 px-4 py-2 bg-green-400 text-white rounded-2xl">
-                    {message.content}
-                  </div>
-                  {index > 0 &&
-                  conversationMessages.data[index - 1].avatarUrl ==
-                    message.avatarUrl ? (
-                    <div className="size-10 flex-shrink-0" />
-                  ) : (
-                    <div>
-                      <img
-                        src={getImageUrl(message.avatarUrl)}
-                        className="size-10 rounded-full flex-shrink-0"
-                      />
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div
-                  className={
-                    "flex items-center" +
-                    (index > 0 &&
-                    conversationMessages.data[index - 1].accountId !=
-                      message.accountId
-                      ? " mt-2"
-                      : "")
-                  }
-                >
-                  {index > 0 &&
-                  conversationMessages.data[index - 1].avatarUrl ==
-                    message.avatarUrl ? (
-                    <div className="size-10 flex-shrink-0" />
-                  ) : (
-                    <div>
-                      <img
-                        src={getImageUrl(message.avatarUrl)}
-                        className="size-10 rounded-full flex-shrink-0"
-                      />
-                    </div>
-                  )}
-                  <div className="ml-3 mr-13 px-4 py-2 bg-slate-400 text-white rounded-2xl">
-                    {message.content}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </VirtualList>
+    chatMessages && (
+      <>
+        <div>
+          <Virtuoso
+            ref={virtuosoRef}
+            className="h-120! scroller"
+            data={chatMessages}
+            itemContent={itemContent}
+            firstItemIndex={firstItemIndex}
+            followOutput={autoFollow ? "auto" : false}
+            atBottomStateChange={setAutoFollow}
+            computeItemKey={(i, m) => m.message.conversationMessageId}
+            atTopThreshold={120}
+            alignToBottom
+            initialTopMostItemIndex={
+              firstItemIndex + (chatMessages?.length ?? 0) - 1
+            }
+            startReached={handleLoadMore}
+          />
+        </div>
         <div className="flex-1/5 relative border-1 border-slate-400/35 rounded-xl mt-1">
           <div>
             <textarea
@@ -261,7 +301,7 @@ export default function WhisperMessageContentWrapper({
             </div>
           </div>
         </div>
-      </div>
+      </>
     )
   );
 }

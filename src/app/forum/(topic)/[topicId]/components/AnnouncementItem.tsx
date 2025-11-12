@@ -1,11 +1,9 @@
 import service from "@/axios";
 import { useAuth } from "@/components/AuthProvider";
 import SwipeableRow from "@/components/ui/SwipeableCard";
-import { AlertOutlined } from "@ant-design/icons";
 import { Popconfirm, Tag } from "antd";
 import useApp from "antd/es/app/useApp";
 import { usePathname, useRouter } from "next/navigation";
-import { threadId } from "worker_threads";
 
 export default function AnnouncementItem({
   announcement,

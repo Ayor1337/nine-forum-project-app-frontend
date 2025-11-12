@@ -1,5 +1,5 @@
 interface Response {
   code: number;
   message: string;
-  data: Object;
+  data: object;
 }

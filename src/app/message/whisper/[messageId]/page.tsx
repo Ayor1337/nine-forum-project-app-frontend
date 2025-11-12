@@ -9,7 +9,10 @@ export default async function WhisperContent({
 
   return (
     <>
-      <WhisperMessageContentWrapper conversationId={messageId} />
+      <WhisperMessageContentWrapper
+        conversationId={messageId}
+        key={messageId}
+      />
     </>
   );
 }

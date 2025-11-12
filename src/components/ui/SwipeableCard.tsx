@@ -1,6 +1,5 @@
 import { UnorderedListOutlined } from "@ant-design/icons";
 import { useRef, useState, useEffect } from "react";
-import { useAuth } from "../AuthProvider";
 
 // 工具函数
 const clamp = (v: number, min: number, max: number) =>
