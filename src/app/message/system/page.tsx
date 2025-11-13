@@ -5,18 +5,15 @@ import { Client, IMessage } from "@stomp/stompjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import SystemMessageCard from "./components/SystemMessageCard";
 import service from "@/axios";
-import VirtutalList from "rc-virtual-list";
-import useApp from "antd/es/app/useApp";
+import { Virtuoso } from "react-virtuoso";
 
 export default function SystemPage() {
+  const PAGE_SIZE = 7;
+
   const [client, setClient] = useState<Client | null>();
   const [notifications, setNotifications] = useState<SystemMessage[]>([]);
-  const [totalSize, setTotalSize] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const { message } = useApp();
-
-  const CONTAINER_HEIGHT = 740;
 
   const fetchSystemMessages = async () => {
     await service
@@ -28,12 +25,11 @@ export default function SystemPage() {
       })
       .then((res) => {
         const data: PageEntity<SystemMessage> = res.data.data;
-        if (data.data == null || data.data.length === 0) {
+        if (page * PAGE_SIZE >= data.totalSize) {
           setHasMore(false);
-          message.info("已经到底了");
         }
         data.data.forEach((item) => {
-          appendSystemMessages(item);
+          appendSystemMessage(item);
         });
       })
       .catch((err) => {
@@ -41,29 +37,40 @@ export default function SystemPage() {
       });
   };
 
-  const appendSystemMessages = useCallback(
-    (message: SystemMessage | SystemMessage[]) => {
-      setNotifications((prev) => {
-        const incoming = Array.isArray(message) ? message : [message];
-        const map = new Map(prev.map((m) => [m.systemMessageId, m]));
-        incoming.forEach((m) => map.set(m.systemMessageId, m));
-        return Array.from(map.values());
-      });
-    },
-    []
-  );
+  const prependSystemMessage = useCallback((message: SystemMessage) => {
+    setNotifications((prevMessages) => {
+      if (
+        prevMessages.some((m) => m.systemMessageId === message.systemMessageId)
+      ) {
+        return prevMessages;
+      }
+      if (!prevMessages) {
+        return [message];
+      }
+      return [message, ...prevMessages];
+    });
+  }, []);
 
-  const onScroll = (e: React.UIEvent<HTMLElement, UIEvent>) => {
-    if (
-      Math.abs(
-        e.currentTarget.scrollHeight -
-          e.currentTarget.scrollTop -
-          CONTAINER_HEIGHT
-      ) <= 1
-    ) {
-      setPage(page + 1);
-    }
-  };
+  const appendSystemMessage = useCallback((message: SystemMessage) => {
+    setNotifications((prevMessages) => {
+      if (
+        prevMessages.some((m) => m.systemMessageId === message.systemMessageId)
+      ) {
+        return prevMessages;
+      }
+      if (!prevMessages) {
+        return [message];
+      }
+      return [...prevMessages, message];
+    });
+  }, []);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!hasMore) return;
+    const next = page + 1;
+    setPage(next);
+    await fetchSystemMessages(); // ← 传入下一页
+  }, [hasMore, page]);
 
   useEffect(() => {
     fetchSystemMessages();
@@ -87,7 +94,7 @@ export default function SystemPage() {
       onConnect: () => {
         setClient(client);
         client.subscribe(`/user/notif/system`, (message: IMessage) => {
-          appendSystemMessages(JSON.parse(message.body));
+          prependSystemMessage(JSON.parse(message.body));
         });
       },
       onStompError: (error) => {
@@ -102,18 +109,19 @@ export default function SystemPage() {
     };
   }, []);
 
+  const itemContent = (index: number, data: SystemMessage) => (
+    <SystemMessageCard item={data} />
+  );
+
   return (
     notifications && (
       <>
-        <VirtutalList
+        <Virtuoso
+          className="h-175!"
+          endReached={handleLoadMore}
           data={notifications}
-          height={CONTAINER_HEIGHT}
-          itemKey="systemMessageId"
-          itemHeight={120}
-          onScroll={onScroll}
-        >
-          {(item: SystemMessage) => <SystemMessageCard item={item} />}
-        </VirtutalList>
+          itemContent={itemContent}
+        />
       </>
     )
   );

@@ -158,7 +158,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
 
     const fetchIsLikeByThreadId = async () => {
       await service
-        .get(`/api/like/is_like`, {
+        .get(`/api/like/info/is_like`, {
           params: {
             thread_id: threadId,
           },
@@ -172,7 +172,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
 
     const fetchIsCollectByThreadId = async () => {
       await service
-        .get(`/api/collect/is_collect`, {
+        .get(`/api/collect/info/is_collect`, {
           params: {
             thread_id: threadId,
           },
@@ -186,7 +186,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
 
     const fetchLikeCountByThreadId = async () => {
       await service
-        .get(`/api/like/get_like_count`, {
+        .get(`/api/like/info/get_like_count`, {
           params: {
             thread_id: threadId,
           },
@@ -200,7 +200,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
 
     const fetchCollectCountByThreadId = async () => {
       await service
-        .get(`/api/collect/get_collect_count`, {
+        .get(`/api/collect/info/get_collect_count`, {
           params: {
             thread_id: threadId,
           },

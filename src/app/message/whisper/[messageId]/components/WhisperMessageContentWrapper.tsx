@@ -12,6 +12,7 @@ import { getImageUrl } from "@/axios/ImageService";
 import { Image } from "antd";
 import { ChatMessage } from "./chat";
 import { formatSmartTime } from "@/func/DateConvert";
+import { useRouter } from "next/navigation";
 
 interface defineProps {
   conversationId: number;
@@ -31,6 +32,7 @@ export default function WhisperMessageContentWrapper({
   const [firstItemIndex, setFirstItemIndex] = useState(Number.MAX_SAFE_INTEGER);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [autoFollow, setAutoFollow] = useState(true);
+  const router = useRouter();
 
   const isSender = useCallback(
     (accoundId: number) => {
@@ -74,7 +76,6 @@ export default function WhisperMessageContentWrapper({
     });
   }, []);
 
-  // 改函数签名：接收 pageNo
   const fetchConversationHistory = useCallback(
     async (pageNo: number) => {
       const res = await service.get("/api/conversation/message/list", {
@@ -87,33 +88,28 @@ export default function WhisperMessageContentWrapper({
       const list = pageEntity.data;
       list.reverse();
 
-      // 批量前置（保持你 ChatMessage 的结构）
       setChatMessages((prev) => {
         const prevArr = prev ?? [];
         const seen = new Set(
           prevArr.map((x) => x.message.conversationMessageId)
         );
 
-        // 过滤掉已经存在的
         const fresh = list.filter(
           (msg) => !seen.has(msg.conversationMessageId)
         );
 
         if (fresh.length === 0) {
-          return prevArr; // 没有新增，直接返回旧的，避免多余 render
+          return prevArr;
         }
 
-        // 映射成你的 ChatMessage 结构（index 仅保留，不作为 key）
         const mapped: ChatMessage[] = fresh.map((msg, i) => ({
           message: msg,
           index: prevArr.length + list.length - i,
         }));
 
-        // 头插：新老顺序保持不变
         return [...mapped, ...prevArr];
       });
 
-      // 🔑 一次性扣减 firstItemIndex（按实际条数）
       if (list.length > 0) {
         setFirstItemIndex((v) => v - list.length);
       }
@@ -147,7 +143,6 @@ export default function WhisperMessageContentWrapper({
 
       if (!chatMessage) return null;
 
-      // 用回调的 index 拿上一条，避免用 message.index 造成错位
       const prev = getPrevMessage(message.index)?.message;
 
       const isMine = isSender(chatMessage.accountId);
@@ -172,13 +167,14 @@ export default function WhisperMessageContentWrapper({
         ? "mr-3 ml-13 px-4 py-2 bg-green-400 text-white rounded-2xl"
         : "ml-3 mr-13 px-4 py-2 bg-slate-400 text-white rounded-2xl";
 
-      // 更通用：用 w-10 h-10，避免 `size-10!` 这种写法
-      const avatarClass = "size-10! rounded-full flex-shrink-0";
+      const avatarClass = "size-10! rounded-full flex-shrink-0 cursor-pointer";
 
       return (
         <div>
           {longTimeNoSee && (
-            <div className="flex flex-1 justify-center">{longTimeNoSee}</div>
+            <div className="flex flex-1 justify-center text-slate-500 text-xs mt-3">
+              {longTimeNoSee}
+            </div>
           )}
           <div className="flex flex-1">
             <div className={wrapperClass}>
@@ -189,6 +185,7 @@ export default function WhisperMessageContentWrapper({
                     src={getImageUrl(chatMessage.avatarUrl)}
                     className={avatarClass}
                     preview={false}
+                    onClick={() => router.push(`/space/${chatMessage.accountId}`)}
                   />
                 ) : (
                   <div className="w-10 h-10 flex-shrink-0" />
@@ -203,6 +200,7 @@ export default function WhisperMessageContentWrapper({
                     src={getImageUrl(chatMessage.avatarUrl)}
                     className={avatarClass}
                     preview={false}
+                    onClick={() => router.push(`/space/${chatMessage.accountId}`)}
                   />
                 ) : (
                   <div className="w-10 h-10 flex-shrink-0" />
@@ -219,12 +217,16 @@ export default function WhisperMessageContentWrapper({
     if (!hasMore) return;
     const next = page + 1;
     setPage(next);
-    await fetchConversationHistory(next); // ← 传入下一页
+    await fetchConversationHistory(next);
   }, [hasMore, page, fetchConversationHistory]);
 
   useEffect(() => {
+    setChatMessages([]);
+    setPage(1);
+    setHasMore(true);
+    setFirstItemIndex(Number.MAX_SAFE_INTEGER);
     fetchConversationHistory(1);
-  }, [fetchConversationHistory]);
+  }, [conversationId, fetchConversationHistory]);
 
   useEffect(() => {
     const client = new Client({
