@@ -21,13 +21,10 @@ export default function HeaderNav() {
   const [client, setClient] = useState<Client | null>(null);
   const [systemUnread, setSystemUnread] = useState<number>(0);
   const [userUnread, setUserUnread] = useState<number>(0);
+  const [replyUnread, setReplyUnread] = useState<number>(0);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const router = useRouter();
-
-  const handleDrawerClose = () => {
-    setDrawerOpen(false);
-  };
-
+``
   const fetchUnreadMessage = async () => {
     await service.get("/api/notif/remaining_message_unread").then((res) => {
       if (res.data.code == 200) {
@@ -45,8 +42,15 @@ export default function HeaderNav() {
         if (res.data.code == 200) {
           if (type == "system") {
             setSystemUnread(res.data.data.unread);
-          } else if (type == "user") {
+            return;
+          }
+          if (type == "user") {
             setUserUnread(res.data.data.unread);
+            return;
+          }
+          if (type == "reply") {
+            setReplyUnread(res.data.data.unread);
+            return;
           }
         }
       });
@@ -56,6 +60,7 @@ export default function HeaderNav() {
     fetchUnreadMessage();
     fetchUnreadMessageItem("system");
     fetchUnreadMessageItem("user");
+    fetchUnreadMessageItem("reply");
   }, []);
 
   useEffect(() => {
@@ -78,6 +83,9 @@ export default function HeaderNav() {
         });
         client.subscribe("/user/notif/unread/user", (message: IMessage) => {
           setUserUnread(JSON.parse(message.body).unread);
+        });
+        client.subscribe("/user/notif/unread/reply", (message: IMessage) => {
+          setReplyUnread(JSON.parse(message.body).unread);
         });
       },
     });
@@ -127,15 +135,15 @@ export default function HeaderNav() {
                     animate={{ height: isNotiHover ? "auto" : 0 }}
                   >
                     <div className="flex flex-col px-1 py-2 gap-1  ">
-                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition">
+                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition" onClick={() => router.push("/message/reply")}>
                         <div>我的回复</div>
-                        <Badge count={0} />
+                        <Badge count={replyUnread} />
                       </div>
-                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition">
+                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition" onClick={() => router.push("/message/system")}>
                         <div>系统通知</div>
                         <Badge count={systemUnread} />
                       </div>
-                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition">
+                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition" onClick={() => router.push("/message/whisper")}>
                         <div>我的消息</div>
                         <Badge count={userUnread} />
                       </div>
@@ -210,22 +218,6 @@ export default function HeaderNav() {
           </div>
         )}
       </div>
-
-      <Drawer
-        title="通知消息"
-        open={isDrawerOpen}
-        onClose={handleDrawerClose}
-        extra={
-          <>
-            <Button onClick={() => router.push("/message")}>
-              在新的标签页打开
-            </Button>
-          </>
-        }
-        width={1000}
-      >
-        <MessageWrapper />
-      </Drawer>
     </div>
   );
 }

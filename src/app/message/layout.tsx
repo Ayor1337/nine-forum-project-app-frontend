@@ -7,6 +7,7 @@ import HeaderNav from "@/components/ui/HeaderNav";
 import { Client, IMessage } from "@stomp/stompjs";
 import { Badge, Tabs } from "antd";
 import { usePathname, useRouter } from "next/navigation";
+import path from "path";
 import { useEffect, useState } from "react";
 
 interface defineProps {
@@ -17,6 +18,7 @@ export default function MessageLayout({ children }: defineProps) {
   const [activeTab, setActiveTab] = useState<string>();
   const [systemUnread, setSystemUnread] = useState<number>(0);
   const [userUnread, setUserUnread] = useState<number>(0);
+  const [replyUnread, setReplyUnread] = useState<number>(0);
   const [clinet, setClient] = useState<Client | null>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -30,8 +32,12 @@ export default function MessageLayout({ children }: defineProps) {
         if (res.data.code == 200) {
           if (type == "system") {
             setSystemUnread(res.data.data.unread);
-          } else if (type == "user") {
+          }
+          if (type == "user") {
             setUserUnread(res.data.data.unread);
+          }
+          if (type == "reply") {
+            setReplyUnread(res.data.data.unread);
           }
         }
       });
@@ -54,6 +60,9 @@ export default function MessageLayout({ children }: defineProps) {
         client.subscribe("/user/notif/unread/user", (message: IMessage) => {
           setUserUnread(JSON.parse(message.body).unread);
         });
+        client.subscribe("/user/notif/unread/reply", (message: IMessage) => {
+          setReplyUnread(JSON.parse(message.body).unread);
+        });
       },
     });
 
@@ -67,6 +76,7 @@ export default function MessageLayout({ children }: defineProps) {
   useEffect(() => {
     fetchUnreadMessage("system");
     fetchUnreadMessage("user");
+    fetchUnreadMessage("reply");
   }, []);
 
   useEffect(() => {
@@ -75,7 +85,7 @@ export default function MessageLayout({ children }: defineProps) {
         setActiveTab(e);
       }
     });
-  }, []);
+  }, [pathname]);
 
   return (
     <div className="min-h-screen relative">
@@ -96,7 +106,7 @@ export default function MessageLayout({ children }: defineProps) {
             {
               key: "reply",
               label: (
-                <Badge>
+                <Badge count={replyUnread} size="small">
                   <div className="py-2">消息通知 </div>
                 </Badge>
               ),
@@ -104,7 +114,7 @@ export default function MessageLayout({ children }: defineProps) {
             {
               key: "system",
               label: (
-                <Badge count={systemUnread}>
+                <Badge count={systemUnread} size="small">
                   <div className="py-2">系统通知</div>
                 </Badge>
               ),
@@ -112,7 +122,7 @@ export default function MessageLayout({ children }: defineProps) {
             {
               key: "whisper",
               label: (
-                <Badge count={userUnread}>
+                <Badge count={userUnread} size="small">
                   <div className="py-2">我的消息</div>
                 </Badge>
               ),

@@ -39,7 +39,7 @@ export default function ChatBoard({ topicId }: defineProps) {
       return;
     }
     await service
-      .post("/api/chat", {
+      .post("/api/chat/send", {
         content: inputValue.trim(),
         topicId: topicId,
       })
@@ -93,7 +93,7 @@ export default function ChatBoard({ topicId }: defineProps) {
 
   const fetchMessages = async () => {
     await service
-      .get("/api/chat/history", {
+      .get("/api/chat/info/history", {
         params: {
           topic_id: topicId,
         },
