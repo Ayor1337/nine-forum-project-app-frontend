@@ -40,4 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-CubismSdkForWeb-5-r.4
+# AGENT FILES
+AGENTS.md
+CLAUDE.md
