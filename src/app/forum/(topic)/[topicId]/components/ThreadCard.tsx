@@ -21,20 +21,26 @@ export interface ThreadWrapperRef {
 
 const ThreadCard = forwardRef<ThreadWrapperRef, defineProps>(
   ({ topicId }, ref) => {
-    const [threadList, setThreadList] = useState<Array<Thread>>();
+    const PAGE_SIZE = 10;
+
+    const [threadList, setThreadList] = useState<PageEntity<Thread>>();
     const [isFetching, setFetching] = useState<boolean>(true);
+    const [page, setPage] = useState<number>(1);
 
     const fetchThreadsByTopicId = useCallback(async (topicId: number) => {
       await service
         .get(`/api/thread/info/topic`, {
           params: {
             topic_id: topicId,
+            page_num: page,
+            page_size: PAGE_SIZE,
           },
         })
         .then((res) => {
           if (res.data.code == 200) {
-            setThreadList(res.data.data);
+            console.log(res.data.data);
 
+            setThreadList(res.data.data);
             setFetching(false);
           }
         });
@@ -77,7 +83,7 @@ const ThreadCard = forwardRef<ThreadWrapperRef, defineProps>(
             {isFetching ? (
               <ThreadItemSkeleton />
             ) : (
-              threadList?.map((tm) => (
+              threadList?.data.map((tm) => (
                 <div key={tm.threadId}>
                   <ThreadItem thread={tm} />
                   <div className="px-4">
@@ -87,7 +93,7 @@ const ThreadCard = forwardRef<ThreadWrapperRef, defineProps>(
               ))
             )}
             {/* Content Card End */}
-            {threadList && threadList.length == 0 && (
+            {threadList && threadList.data.length == 0 && (
               <div className="flex justify-center items-center">
                 <div className="py-10">该主题还是空的, 请发送第一个帖子</div>
               </div>

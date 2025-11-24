@@ -38,17 +38,6 @@ export default function ThreadWrapper({ topicId }: { topicId: string }) {
   return (
     <>
       <div className="basis-3/4 grow-0 flex flex-col gap-4">
-        {/* Search Start */}
-        <div className="rounded-xl border border-black/5 bg-white shadow-sm hover:shadow-md transition">
-          <div className="p-4">
-            <Input
-              placeholder="想要搜点什么..."
-              className=" !border-0 !ring-0 !outline-none"
-            />
-          </div>
-        </div>
-        {/* Search End */}
-
         {/* Announcement Start */}
         {announcements && announcements.length > 0 && (
           <div className="rounded-xl border border-black/5 bg-white shadow-sm hover:shadow-md transition p-3 overflow-hidden">
@@ -64,16 +53,15 @@ export default function ThreadWrapper({ topicId }: { topicId: string }) {
 
         {/* ChatBoard Start */}
         <div className="relative">
-          <div className="fixed -translate-x-15 z-99">
-            <PosterTool topicId={topicId} refresh={updateDataHandler} />
-          </div>
           <ChatBoard topicId={topicId} />
         </div>
-
         {/* ChatBoard End */}
 
         {/* Content Start */}
         <div className="relative">
+          <div className="fixed -translate-x-15 z-99">
+            <PosterTool topicId={topicId} refresh={updateDataHandler} />
+          </div>
           <ThreadCard topicId={Number(topicId)} ref={threadWrapperRef} />
         </div>
 

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
-import { Avatar, Badge, Button, Drawer } from "antd";
-import { BellOutlined } from "@ant-design/icons";
+import { Avatar, Badge, Button, Drawer, Input } from "antd";
+import { BellOutlined, SearchOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { getImageUrl } from "@/axios/ImageService";
@@ -24,7 +24,7 @@ export default function HeaderNav() {
   const [replyUnread, setReplyUnread] = useState<number>(0);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const router = useRouter();
-``
+
   const fetchUnreadMessage = async () => {
     await service.get("/api/notif/remaining_message_unread").then((res) => {
       if (res.data.code == 200) {
@@ -113,6 +113,8 @@ export default function HeaderNav() {
           </Link>
         </nav>
 
+        <Search />
+
         {/* 右侧操作 */}
         {isLogin ? (
           <div className="relative">
@@ -135,15 +137,24 @@ export default function HeaderNav() {
                     animate={{ height: isNotiHover ? "auto" : 0 }}
                   >
                     <div className="flex flex-col px-1 py-2 gap-1  ">
-                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition" onClick={() => router.push("/message/reply")}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition"
+                        onClick={() => router.push("/message/reply")}
+                      >
                         <div>我的回复</div>
                         <Badge count={replyUnread} />
                       </div>
-                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition" onClick={() => router.push("/message/system")}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition"
+                        onClick={() => router.push("/message/system")}
+                      >
                         <div>系统通知</div>
                         <Badge count={systemUnread} />
                       </div>
-                      <div className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition" onClick={() => router.push("/message/whisper")}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer hover:bg-neutral-100 px-3 py-1 rounded-2xl transition"
+                        onClick={() => router.push("/message/whisper")}
+                      >
                         <div>我的消息</div>
                         <Badge count={userUnread} />
                       </div>
@@ -219,5 +230,88 @@ export default function HeaderNav() {
         )}
       </div>
     </div>
+  );
+}
+
+function Search() {
+  const [query, setQuery] = useState<string>("");
+  const [isHover, setIsHover] = useState<boolean>(false);
+  const [isTopicHover, setIsTopicHover] = useState<boolean>(false);
+  const router = useRouter();
+  const handleSearch = () => {
+    if (query) {
+      router.push(`/search/query?q=${query}`);
+    } else {
+      router.push("/search");
+    }
+  };
+
+  return (
+    <>
+      {/* Search Start */}
+      <AnimatePresence initial={false}>
+        <div className="rounded-xl peer flex w-150 bg-slate-50 shadow-sm transition relative overflow-hidden">
+          <input
+            placeholder="想搜点什么呢..."
+            className="border-0 ring-0 outline-none py-1 px-4 w-full"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key == "Enter") {
+                handleSearch();
+              }
+            }}
+          />
+          <motion.div
+            className={
+              "absolute right-0 group h-full overflow-hidden rounded-xl cursor-pointer transition " +
+              (isTopicHover ? "bg-orange-600" : "bg-orange-500")
+            }
+            onMouseEnter={() => setIsHover(true)}
+            onMouseLeave={() => setIsHover(false)}
+          >
+            <motion.div
+              animate={{
+                width: isHover ? "140px" : "40px",
+              }}
+              className="flex items-center text-neutral-50 text-shadow-xs rounded-xl rounded-l-none transition h-full "
+            >
+              <motion.div className="flex flex-1 h-full items-center">
+                <motion.div
+                  animate={{ width: isHover ? "60%" : "100%" }}
+                  className="text-nowrap flex gap-2 justify-center items-center h-full rounded-r-xl bg-blue-700 hover:bg-blue-900 hover:text-neutral-200 transition"
+                  onClick={() => {
+                    handleSearch();
+                  }}
+                >
+                  <SearchOutlined />
+                  <motion.div animate={{ opacity: isHover ? 1 : 0 }}>
+                    全局
+                  </motion.div>
+                </motion.div>
+                <motion.div
+                  animate={{ width: isHover ? "40%" : "0%" }}
+                  className="text-nowrap flex justify-center items-center h-full"
+                  onMouseEnter={() => {
+                    setIsTopicHover(true);
+                  }}
+                  onMouseLeave={() => {
+                    setIsTopicHover(false);
+                  }}
+                  onClick={() => {
+                    handleSearch();
+                  }}
+                >
+                  <motion.div animate={{ opacity: isHover ? 1 : 0 }}>
+                    主题
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </AnimatePresence>
+      {/* Search End */}
+    </>
   );
 }

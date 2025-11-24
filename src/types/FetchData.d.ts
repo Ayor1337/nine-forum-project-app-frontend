@@ -125,3 +125,8 @@ interface Tag {
   tagId: number;
   tag: string;
 }
+
+interface Hotkeyword {
+  keyword: string;
+  count: number;
+}
