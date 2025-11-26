@@ -1,5 +1,4 @@
 import { formatDate } from "@/func/DateConvert";
-import { quillToHTML } from "@/func/QuillToHTML";
 import { useRouter } from "next/navigation";
 
 interface defineProps {
@@ -11,8 +10,8 @@ export default function SearchResultCard({ thread }: defineProps) {
 
   return (
     thread && (
-      <div className="flex-1 py-3 px-2">
-        <div className="flex flex-col">
+      <div className="flex py-3 px-2">
+        <div className="flex w-full flex-col">
           <div
             onClick={() =>
               router.push(`/forum/${thread.topicId}/${thread.threadId}`)

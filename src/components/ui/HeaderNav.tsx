@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import { Avatar, Badge, Button, Drawer, Input } from "antd";
-import { BellOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  BellOutlined,
+  ClockCircleOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { getImageUrl } from "@/axios/ImageService";
@@ -237,6 +241,7 @@ function Search() {
   const [query, setQuery] = useState<string>("");
   const [isHover, setIsHover] = useState<boolean>(false);
   const [isTopicHover, setIsTopicHover] = useState<boolean>(false);
+  const [isInput, setIsInput] = useState(false);
   const router = useRouter();
   const handleSearch = () => {
     if (query) {
@@ -249,68 +254,98 @@ function Search() {
   return (
     <>
       {/* Search Start */}
-      <AnimatePresence initial={false}>
-        <div className="rounded-xl peer flex w-150 bg-slate-50 shadow-sm transition relative overflow-hidden">
-          <input
-            placeholder="想搜点什么呢..."
-            className="border-0 ring-0 outline-none py-1 px-4 w-full"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key == "Enter") {
-                handleSearch();
+      <div className="relative">
+        <AnimatePresence initial={false}>
+          <div className="rounded-xl peer flex w-150 bg-slate-50 shadow-sm transition relative overflow-hidden">
+            <input
+              placeholder=""
+              className={
+                "border-0 transition ring-0 outline-none py-1 pr-4 pl-7 w-full " +
+                (isInput && "pl-4!")
               }
-            }}
-          />
-          <motion.div
-            className={
-              "absolute right-0 group h-full overflow-hidden rounded-xl cursor-pointer transition " +
-              (isTopicHover ? "bg-orange-600" : "bg-orange-500")
-            }
-            onMouseEnter={() => setIsHover(true)}
-            onMouseLeave={() => setIsHover(false)}
-          >
-            <motion.div
-              animate={{
-                width: isHover ? "140px" : "40px",
+              value={query}
+              onFocus={() => setIsInput(true)}
+              onBlur={() => setIsInput(false)}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key == "Enter") {
+                  handleSearch();
+                }
               }}
-              className="flex items-center text-neutral-50 text-shadow-xs rounded-xl rounded-l-none transition h-full "
+            />
+            {!isInput && query.length < 1 && (
+              <div className="absolute left-7 top-1/2 -translate-y-1/2 text-neutral-400">
+                想搜点什么呢...
+              </div>
+            )}
+            <motion.div
+              className={
+                "absolute right-0 group h-full overflow-hidden rounded-xl cursor-pointer transition " +
+                (isTopicHover ? "bg-orange-600" : "bg-orange-500")
+              }
+              onMouseEnter={() => setIsHover(true)}
+              onMouseLeave={() => setIsHover(false)}
             >
-              <motion.div className="flex flex-1 h-full items-center">
-                <motion.div
-                  animate={{ width: isHover ? "60%" : "100%" }}
-                  className="text-nowrap flex gap-2 justify-center items-center h-full rounded-r-xl bg-blue-700 hover:bg-blue-900 hover:text-neutral-200 transition"
-                  onClick={() => {
-                    handleSearch();
-                  }}
-                >
-                  <SearchOutlined />
-                  <motion.div animate={{ opacity: isHover ? 1 : 0 }}>
-                    全局
+              <motion.div
+                animate={{
+                  width: isHover ? "140px" : "40px",
+                }}
+                className="flex items-center text-neutral-50 text-shadow-xs rounded-xl rounded-l-none transition h-full "
+              >
+                <motion.div className="flex flex-1 h-full items-center">
+                  <motion.div
+                    animate={{ width: isHover ? "60%" : "100%" }}
+                    className="text-nowrap flex gap-2 justify-center items-center h-full rounded-r-xl bg-blue-700 hover:bg-blue-900 hover:text-neutral-200 transition"
+                    onClick={() => {
+                      handleSearch();
+                    }}
+                  >
+                    <SearchOutlined />
+                    <motion.div animate={{ opacity: isHover ? 1 : 0 }}>
+                      全局
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-                <motion.div
-                  animate={{ width: isHover ? "40%" : "0%" }}
-                  className="text-nowrap flex justify-center items-center h-full"
-                  onMouseEnter={() => {
-                    setIsTopicHover(true);
-                  }}
-                  onMouseLeave={() => {
-                    setIsTopicHover(false);
-                  }}
-                  onClick={() => {
-                    handleSearch();
-                  }}
-                >
-                  <motion.div animate={{ opacity: isHover ? 1 : 0 }}>
-                    主题
+                  <motion.div
+                    animate={{ width: isHover ? "40%" : "0%" }}
+                    className="text-nowrap flex justify-center items-center h-full"
+                    onMouseEnter={() => {
+                      setIsTopicHover(true);
+                    }}
+                    onMouseLeave={() => {
+                      setIsTopicHover(false);
+                    }}
+                    onClick={() => {
+                      handleSearch();
+                    }}
+                  >
+                    <motion.div animate={{ opacity: isHover ? 1 : 0 }}>
+                      主题
+                    </motion.div>
                   </motion.div>
                 </motion.div>
               </motion.div>
             </motion.div>
+          </div>
+        </AnimatePresence>
+        <AnimatePresence initial={false}>
+          <motion.div
+            className={
+              "absolute rounded-xl top-1 size-10 pointer-events-none " +
+              (isInput && "bg-white pointer-events-auto shadow-xl")
+            }
+            animate={{
+              x: isInput ? 0 : 10,
+              y: isInput ? 30 : 0,
+              height: isInput ? "100%" : 20,
+              width: isInput ? "100%" : "70%",
+            }}
+          >
+            <div className="text-neutral-400">
+              <ClockCircleOutlined />
+            </div>
           </motion.div>
-        </div>
-      </AnimatePresence>
+        </AnimatePresence>
+      </div>
       {/* Search End */}
     </>
   );
