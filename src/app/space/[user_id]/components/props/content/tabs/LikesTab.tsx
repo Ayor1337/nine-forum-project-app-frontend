@@ -1,4 +1,4 @@
-import service from "@/axios";
+import request from "@/api/request";
 import { formatDate } from "@/func/DateConvert";
 import { quillToHTML } from "@/func/QuillToHTML";
 import { EyeOutlined, MessageOutlined, LikeOutlined } from "@ant-design/icons";
@@ -18,7 +18,7 @@ export default function LikesTab({ userId }: defineProps) {
   const { message } = useApp();
 
   const fetchLikeThreadsByUserId = async () => {
-    await service
+    await request
       .get(`/api/like/get_likes`, {
         params: {
           user_id: userId,
@@ -34,7 +34,7 @@ export default function LikesTab({ userId }: defineProps) {
   };
 
   const unlikeThread = async (threadId: number) => {
-    await service
+    await request
       .post(
         `/api/like/unlike_thread`,
         {},

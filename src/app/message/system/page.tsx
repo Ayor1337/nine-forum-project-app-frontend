@@ -1,10 +1,10 @@
 "use client";
 
-import { getToken } from "@/axios/Authorization";
+import { getToken } from "@/api/utils/auth";
 import { Client, IMessage } from "@stomp/stompjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import SystemMessageCard from "./components/SystemMessageCard";
-import service from "@/axios";
+import request from "@/api/request";
 import { Virtuoso } from "react-virtuoso";
 
 export default function SystemPage() {
@@ -16,7 +16,7 @@ export default function SystemPage() {
   const [hasMore, setHasMore] = useState<boolean>(true);
 
   const fetchSystemMessages = async () => {
-    await service
+    await request
       .get("/api/system/message/list", {
         params: {
           page_num: page,

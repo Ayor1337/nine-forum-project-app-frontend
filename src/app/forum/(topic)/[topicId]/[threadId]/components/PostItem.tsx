@@ -1,7 +1,7 @@
 "use client";
 
-import service from "@/axios";
-import { getImageUrl } from "@/axios/ImageService";
+import request from "@/api/request";
+import { getImageUrl } from "@/api/utils/image";
 import { useAuth } from "@/components/AuthProvider";
 import { formatDate } from "@/func/DateConvert";
 import { quillToHTML } from "@/func/QuillToHTML";
@@ -35,7 +35,7 @@ export default function PostItem({ post, handleRefresh }: defineProps) {
   };
 
   const removePost = async () => {
-    await service
+    await request
       .delete(`/api/post/delete`, {
         params: {
           post_id: post.postId,
@@ -52,7 +52,7 @@ export default function PostItem({ post, handleRefresh }: defineProps) {
   };
 
   const removePostPerm = async () => {
-    await service
+    await request
       .delete(`/api/post/perm/delete`, {
         params: {
           post_id: post.postId,

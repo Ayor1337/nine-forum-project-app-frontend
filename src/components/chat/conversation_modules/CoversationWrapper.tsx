@@ -1,6 +1,6 @@
 "use client";
 
-import service from "@/axios";
+import request from "@/api/request";
 import { useEffect, useState } from "react";
 import ConversationTabs from "./components/ConversationTabs";
 import ConversationContent from "./components/ConversationContent";
@@ -10,7 +10,7 @@ export default function ConversationWrapper() {
   const [selectKey, setSelectKey] = useState<number>();
 
   const fetchCoversationList = async () => {
-    await service.get("/api/conversation/list").then((res) => {
+    await request.get("/api/conversation/list").then((res) => {
       if (res.data.code == 200) {
         setConversationList(res.data.data);
       }

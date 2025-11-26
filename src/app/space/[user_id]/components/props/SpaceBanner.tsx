@@ -1,11 +1,11 @@
-import { getImageUrl } from "@/axios/ImageService";
+import { getImageUrl } from "@/api/utils/image";
 import { Avatar, Button } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
 import AvatarUploadModal from "./AvatarUploadModal";
 import BannerUploadModal from "./BannerUploadModal";
-import service from "@/axios";
+import request from "@/api/request";
 import { useRouter } from "next/navigation";
 
 export default function SpaceBanner({
@@ -28,7 +28,7 @@ export default function SpaceBanner({
   };
 
   const handleTalk = async () => {
-    await service
+    await request
       .get("/api/conversation/talk", {
         params: {
           accountId: userInfo.accountId,
@@ -46,7 +46,7 @@ export default function SpaceBanner({
   };
 
   const createNewConversation = async () => {
-    await service
+    await request
       .post(
         "/api/conversation/new",
         {},

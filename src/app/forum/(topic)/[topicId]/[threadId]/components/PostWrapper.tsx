@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import PostCard, { PostWrapperRef } from "./PostCard";
 import ReplyBox from "@/components/ui/QuillTextBox";
 import { Divider } from "antd";
-import service from "@/axios";
+import request from "@/api/request";
 import useApp from "antd/es/app/useApp";
 
 export default function PostWrapper({ threadId }: { threadId: string }) {
@@ -17,7 +17,7 @@ export default function PostWrapper({ threadId }: { threadId: string }) {
   };
 
   const uploadPost = async (content: string | null) => {
-    await service
+    await request
       .post("/api/post/post", {
         content: content,
         threadId: threadId,
@@ -35,7 +35,7 @@ export default function PostWrapper({ threadId }: { threadId: string }) {
   };
 
   const viewThread = async () => {
-    await service.post(
+    await request.post(
       `/api/thread/view`,
       {},
       {

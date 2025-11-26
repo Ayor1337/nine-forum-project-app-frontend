@@ -2,23 +2,18 @@
 
 import { Input, Tag } from "antd";
 import PosterTool from "./PosterTool";
-import ThreadCard, { ThreadWrapperRef } from "./ThreadCard";
+import ThreadCard from "./ThreadCard";
 import { useEffect, useRef, useState } from "react";
-import service from "@/axios";
+import request from "@/api/request";
 import { usePathname, useRouter } from "next/navigation";
 import AnnouncementItem from "./AnnouncementItem";
 import ChatBoard from "./ChatBoard";
 
 export default function ThreadWrapper({ topicId }: { topicId: string }) {
-  const threadWrapperRef = useRef<ThreadWrapperRef>(null);
   const [announcements, setAnncouncements] = useState<Announcement[]>();
 
-  const updateDataHandler = async () => {
-    await await threadWrapperRef.current?.refresh();
-  };
-
   const fetchAnnouncement = async () => {
-    await service
+    await request
       .get(`/api/thread/info/announcement`, {
         params: {
           topic_id: topicId,
@@ -58,11 +53,8 @@ export default function ThreadWrapper({ topicId }: { topicId: string }) {
         {/* ChatBoard End */}
 
         {/* Content Start */}
-        <div className="relative">
-          <div className="fixed -translate-x-15 z-99">
-            <PosterTool topicId={topicId} refresh={updateDataHandler} />
-          </div>
-          <ThreadCard topicId={Number(topicId)} ref={threadWrapperRef} />
+        <div>
+          <ThreadCard topicId={Number(topicId)} />
         </div>
 
         {/* Content End */}

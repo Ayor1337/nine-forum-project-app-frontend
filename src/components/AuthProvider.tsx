@@ -1,7 +1,7 @@
 "use client";
 
-import service from "@/axios";
-import { getToken, removeToken, storeLocalToken } from "@/axios/Authorization";
+import request from "@/api/request";
+import { getToken, removeToken, storeLocalToken } from "@/api/utils/auth";
 import { App, FormProps } from "antd";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -40,7 +40,7 @@ export function AuthProvider({
 
   const getUserInfo = async (token: string | null) => {
     if (token != null) {
-      await service
+      await request
         .get("/api/user/info")
         .then((res) => {
           if (res.data.code == 200) {
@@ -57,7 +57,7 @@ export function AuthProvider({
   };
 
   const login: FormProps<FormType>["onFinish"] = async (formData) => {
-    await service
+    await request
       .post(
         "/api/auth/login",
         {
@@ -84,7 +84,7 @@ export function AuthProvider({
   };
 
   const logout = async () => {
-    await service.post("api/auth/logout").then((res) => {
+    await request.post("api/auth/logout").then((res) => {
       if (res.data.code == 200) {
         message.info("退出成功");
         logoutLocal();

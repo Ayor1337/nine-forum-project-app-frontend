@@ -1,4 +1,4 @@
-import service from "@/axios";
+import request from "@/api/request";
 import { useAuth } from "@/components/AuthProvider";
 import SwipeableRow from "@/components/ui/SwipeableCard";
 import { Popconfirm, Tag } from "antd";
@@ -16,7 +16,7 @@ export default function AnnouncementItem({
   const { permissionVerify } = useAuth();
 
   const unsetAnnouncement = async () => {
-    await service
+    await request
       .post(`/api/thread/perm/unset_announcement`, {
         topicId: announcement.topicId,
         threadId: announcement.threadId,

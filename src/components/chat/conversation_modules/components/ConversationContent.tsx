@@ -1,6 +1,6 @@
-import service from "@/axios";
-import { getToken } from "@/axios/Authorization";
-import { getImageUrl } from "@/axios/ImageService";
+import request from "@/api/request";
+import { getToken } from "@/api/utils/auth";
+import { getImageUrl } from "@/api/utils/image";
 import { useAuth } from "@/components/AuthProvider";
 import { Client, IMessage } from "@stomp/stompjs";
 import useApp from "antd/es/app/useApp";
@@ -34,7 +34,7 @@ export default function ConversationContent({ conversationId }: defineProps) {
     if (conversationId == null || conversationId == 0) {
       return;
     }
-    await service
+    await request
       .post("/api/conversation/send", {
         conversationId: conversationId,
         content: content,
@@ -55,7 +55,7 @@ export default function ConversationContent({ conversationId }: defineProps) {
   };
 
   const fetchConversationHistory = async (id: number) => {
-    await service
+    await request
       .get("/api/conversation/message/list", {
         params: {
           conversationId: id,

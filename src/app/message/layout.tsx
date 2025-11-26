@@ -1,7 +1,7 @@
 "use client";
 
-import service from "@/axios";
-import { getToken } from "@/axios/Authorization";
+import request from "@/api/request";
+import { getToken } from "@/api/utils/auth";
 import Footer from "@/components/ui/Footer";
 import HeaderNav from "@/components/ui/HeaderNav";
 import { Client, IMessage } from "@stomp/stompjs";
@@ -24,7 +24,7 @@ export default function MessageLayout({ children }: defineProps) {
   const pathname = usePathname();
 
   const fetchUnreadMessage = async (type: string) => {
-    await service
+    await request
       .get(`/api/notif/remaining_message_unread`, {
         params: { type: type },
       })

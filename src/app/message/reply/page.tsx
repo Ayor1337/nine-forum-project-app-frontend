@@ -1,9 +1,9 @@
 "use client";
 
-import { getToken } from "@/axios/Authorization";
+import { getToken } from "@/api/utils/auth";
 import { Client, IMessage } from "@stomp/stompjs";
 import { useCallback, useEffect, useState } from "react";
-import service from "@/axios";
+import request from "@/api/request";
 import { Virtuoso } from "react-virtuoso";
 import ReplyMessageCard from "./components/ReplyMessageCard";
 
@@ -16,7 +16,7 @@ export default function SystemPage() {
   const [hasMore, setHasMore] = useState<boolean>(true);
 
   const fetchReplyMessages = async () => {
-    await service
+    await request
       .get("/api/post/message/list", {
         params: {
           page_num: page,

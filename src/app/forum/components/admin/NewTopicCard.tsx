@@ -1,5 +1,5 @@
-import service from "@/axios";
-import { getBase64WithType, getImageUrl } from "@/axios/ImageService";
+import request from "@/api/request";
+import { getBase64WithType, getImageUrl } from "@/api/utils/image";
 import { PlusOutlined } from "@ant-design/icons";
 import { Image, Input, Upload } from "antd";
 import ImgCrop from "antd-img-crop";
@@ -30,7 +30,7 @@ export default function NewTopicCard({ themeId, handleRefresh }: defineProps) {
         if (desc == "待输入描述") {
           setDesc("");
         }
-        service
+        request
           .put("/api/topic/insert", {
             title: title,
             description: desc,

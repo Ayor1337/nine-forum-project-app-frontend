@@ -1,5 +1,5 @@
 import page from "@/app/page";
-import service from "@/axios";
+import request from "@/api/request";
 import { Empty, Card, Divider, Popconfirm, Button, Pagination } from "antd";
 import useApp from "antd/es/app/useApp";
 import Link from "next/link";
@@ -17,7 +17,7 @@ export default function CollectTab({ userId }: defineProps) {
   const pageSize = 8;
 
   const fetchCollectThreadsByUserId = async () => {
-    await service
+    await request
       .get(`/api/collect/get_collects`, {
         params: {
           user_id: userId,

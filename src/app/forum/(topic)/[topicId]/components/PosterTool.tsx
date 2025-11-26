@@ -1,6 +1,6 @@
 "use client";
 
-import service from "@/axios";
+import request from "@/api/request";
 import QuillTextBox from "@/components/ui/QuillTextBox";
 import {
   CloseOutlined,
@@ -13,7 +13,6 @@ import { Button, Divider, Input } from "antd";
 import useApp from "antd/es/app/useApp";
 import { AnimatePresence, motion, px } from "framer-motion";
 import { use, useEffect, useRef, useState } from "react";
-import { ThreadWrapperRef } from "./ThreadCard";
 
 interface defineProps {
   topicId: string;
@@ -32,7 +31,7 @@ export default function PosterTool({ topicId, refresh }: defineProps) {
   };
 
   const uploadThread = async (content: string | null) => {
-    await service
+    await request
       .post("/api/thread/post_thread", {
         topicId: topicId,
         content: content,

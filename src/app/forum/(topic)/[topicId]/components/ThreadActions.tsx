@@ -8,7 +8,7 @@ import {
 import { Popconfirm, Popover, Button, Input, Select } from "antd";
 import useApp from "antd/es/app/useApp";
 import { useEffect, useState } from "react";
-import service from "@/axios";
+import request from "@/api/request";
 
 interface Option {
   value: number;
@@ -31,7 +31,7 @@ export default function ThreadActions({
 
   /** 拉取标签 */
   const fetchTagByTopicId = async () => {
-    const res = await service.get("/api/tag/info/list_by_topic", {
+    const res = await request.get("/api/tag/info/list_by_topic", {
       params: { topic_id: topicId },
     });
     if (res.data.code === 200) {
@@ -45,7 +45,7 @@ export default function ThreadActions({
 
   /** 修改 / 添加 / 移除 标签 */
   const updateThreadTag = async (tagId: number) => {
-    const res = await service.post("/api/thread/perm/update_tag", {
+    const res = await request.post("/api/thread/perm/update_tag", {
       tagId,
       topicId,
       threadId: thread.threadId,
@@ -56,7 +56,7 @@ export default function ThreadActions({
   };
   const insertNewTag = async () => {
     if (!newTag) return message.warning("请输入新标签");
-    const res = await service.put("/api/tag/perm/insert_new_tag", {
+    const res = await request.put("/api/tag/perm/insert_new_tag", {
       topicId,
       tag: newTag,
     });
@@ -67,7 +67,7 @@ export default function ThreadActions({
     } else message.warning(res.data.message);
   };
   const removeThreadTag = async () => {
-    const res = await service.post("/api/thread/perm/delete_tag", {
+    const res = await request.post("/api/thread/perm/delete_tag", {
       topicId: thread.threadId,
     });
     if (res.data.code === 200) {
@@ -78,7 +78,7 @@ export default function ThreadActions({
 
   /** 公告 / 精选 / 删除 */
   const setAnnouncement = async () => {
-    const res = await service.post("/api/thread/perm/set_announcement", {
+    const res = await request.post("/api/thread/perm/set_announcement", {
       threadId: thread.threadId,
       topicId,
     });
@@ -87,7 +87,7 @@ export default function ThreadActions({
       : message.warning(res.data.message);
   };
   const setFeatured = async () => {
-    const res = await service.post("/api/thread/perm/set_featured", {
+    const res = await request.post("/api/thread/perm/set_featured", {
       threadId: thread.threadId,
       topicId,
     });
@@ -96,7 +96,7 @@ export default function ThreadActions({
       : message.warning(res.data.message);
   };
   const removeThread = async () => {
-    const res = await service.post("/api/thread/perm/remove_thread", {
+    const res = await request.post("/api/thread/perm/remove_thread", {
       threadId: thread.threadId,
       topicId,
     });

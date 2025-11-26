@@ -1,7 +1,7 @@
 "use client";
 
-import service from "@/axios";
-import { getImageUrl } from "@/axios/ImageService";
+import request from "@/api/request";
+import { getImageUrl } from "@/api/utils/image";
 import { numberProcess } from "@/func/NumberProcess";
 import { Skeleton } from "antd";
 import Link from "next/link";
@@ -18,7 +18,7 @@ export default function TopicItem({ themeId }: defineProps) {
   const pathname = usePathname();
 
   const fetchTopicData = useCallback(async (themeId: number) => {
-    await service
+    await request
       .get(`/api/topic/info/list_by_theme_id`, {
         params: {
           theme_id: themeId,

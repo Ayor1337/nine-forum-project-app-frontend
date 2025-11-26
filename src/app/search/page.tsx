@@ -1,6 +1,6 @@
 "use client";
 
-import service from "@/axios";
+import request from "@/api/request";
 import { ClockCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -16,7 +16,7 @@ export default function SearchPage() {
   const [hotkeywords, setHotkeywords] = useState<Array<Hotkeyword>>([]);
 
   const fetchSerachHistory = useCallback(async () => {
-    await service
+    await request
       .get("/api/search/history")
       .then((res) => {
         if (res.data.code == 200) {
@@ -29,7 +29,7 @@ export default function SearchPage() {
   }, []);
 
   const fetchHotkeys = useCallback(async () => {
-    await service
+    await request
       .get("/api/search/info/hot_keyword", {
         params: {
           size: 10,
@@ -45,7 +45,7 @@ export default function SearchPage() {
   }, []);
 
   const removeSearchHistory = useCallback(async (key: string) => {
-    await service
+    await request
       .delete("/api/search/history", {
         params: {
           query: key,

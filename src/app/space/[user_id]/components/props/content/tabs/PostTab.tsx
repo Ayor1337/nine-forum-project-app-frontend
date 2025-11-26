@@ -1,5 +1,5 @@
 import page from "@/app/page";
-import service from "@/axios";
+import request from "@/api/request";
 import { formatDate } from "@/func/DateConvert";
 import { quillToHTML } from "@/func/QuillToHTML";
 import { EyeOutlined, MessageOutlined, LikeOutlined } from "@ant-design/icons";
@@ -17,7 +17,7 @@ export default function PostTab({ userId }: defineProps) {
   const pageSize = 10;
 
   const fetchThreadsByUserId = async () => {
-    await service
+    await request
       .get(`/api/thread/info/user`, {
         params: {
           user_id: userId,

@@ -1,7 +1,7 @@
 "use client";
 
-import service from "@/axios";
-import { getBase64WithType } from "@/axios/ImageService";
+import request from "@/api/request";
+import { getBase64WithType } from "@/api/utils/image";
 import { useAuth } from "@/components/AuthProvider";
 import { Button, Upload } from "antd";
 import ImgCrop from "antd-img-crop";

@@ -5,7 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { Avatar } from "antd";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { getImageUrl } from "@/axios/ImageService";
+import { getImageUrl } from "@/api/utils/image";
 import { useRouter } from "next/navigation";
 
 export default function SearchHeader() {

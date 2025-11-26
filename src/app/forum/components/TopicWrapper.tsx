@@ -3,13 +3,13 @@
 import React from "react";
 import TopicCard from "./TopicCard";
 import { useCallback, useEffect, useState } from "react";
-import service from "@/axios";
+import { getThemeList } from "@/api/theme";
 
 export default function TopicWrapper() {
   const [themes, setThemes] = useState<Array<Theme>>();
 
   const fetchThemeData = useCallback(async () => {
-    await service.get("/api/theme/info/list").then((res) => {
+    await getThemeList().then((res) => {
       if (res.data.code == 200) {
         setThemes(res.data.data);
       } else return null;

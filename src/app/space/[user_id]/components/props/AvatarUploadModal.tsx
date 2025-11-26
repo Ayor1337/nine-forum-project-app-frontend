@@ -1,7 +1,7 @@
 "use client";
 
-import service from "@/axios";
-import { getBase64WithType, getImageUrl } from "@/axios/ImageService";
+import request from "@/api/request";
+import { getBase64WithType, getImageUrl } from "@/api/utils/image";
 import { useAuth } from "@/components/AuthProvider";
 import { UploadOutlined } from "@ant-design/icons";
 import { Avatar, Button, Image, Modal, Upload } from "antd";

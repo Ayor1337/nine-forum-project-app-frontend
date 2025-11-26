@@ -1,8 +1,8 @@
 "use client";
 
-import service from "@/axios";
-import { getToken } from "@/axios/Authorization";
-import { getImageUrl } from "@/axios/ImageService";
+import request from "@/api/request";
+import { getToken } from "@/api/utils/auth";
+import { getImageUrl } from "@/api/utils/image";
 import { CloseOutlined } from "@ant-design/icons";
 import { Client, IMessage } from "@stomp/stompjs";
 import { usePathname, useRouter } from "next/navigation";
@@ -55,7 +55,7 @@ export default function WhisperTabs() {
   };
 
   const fetchCoversationList = async () => {
-    await service.get("/api/conversation/list").then((res) => {
+    await request.get("/api/conversation/list").then((res) => {
       if (res.data.code == 200) {
         setConversationList(res.data.data);
       }
@@ -63,7 +63,7 @@ export default function WhisperTabs() {
   };
 
   const fetchUnreadList = async () => {
-    await service.get("/api/conversation/message/unread").then((res) => {
+    await request.get("/api/conversation/message/unread").then((res) => {
       if (res.data.code == 200) {
         setChatUnread(res.data.data);
       }
@@ -71,7 +71,7 @@ export default function WhisperTabs() {
   };
 
   const readUnread = async (conversationId: number, userId: number) => {
-    await service
+    await request
       .get("/api/conversation/message/read", {
         params: {
           conversationId: conversationId,
@@ -86,7 +86,7 @@ export default function WhisperTabs() {
   };
 
   const hideConversation = async (id: number) => {
-    await service
+    await request
       .post(
         "/api/conversation/hide",
         {},

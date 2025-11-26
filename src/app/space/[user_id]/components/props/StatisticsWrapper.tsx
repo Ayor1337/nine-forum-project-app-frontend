@@ -1,4 +1,4 @@
-import service from "@/axios";
+import request from "@/api/request";
 import { useAuth } from "@/components/AuthProvider";
 import { PlusOutlined, EditOutlined } from "@ant-design/icons";
 import { Card, Button } from "antd";
@@ -10,7 +10,7 @@ export default function StatisticsWrapper() {
   const [statData, setStatData] = useState<UserStat>();
 
   const fetchStatData = async () => {
-    await service.get("/api/stat/info").then((res) => {
+    await request.get("/api/stat/info").then((res) => {
       if (res.data.code == 200) {
         setStatData(res.data.data);
       } else {

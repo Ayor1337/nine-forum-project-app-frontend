@@ -1,4 +1,4 @@
-import { getImageUrl } from "@/axios/ImageService";
+import { getImageUrl } from "@/api/utils/image";
 import { formatDate } from "@/func/DateConvert";
 import { Button } from "antd";
 import { AnimatePresence, motion } from "framer-motion";

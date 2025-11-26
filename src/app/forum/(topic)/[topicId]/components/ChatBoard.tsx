@@ -1,12 +1,10 @@
-import service from "@/axios";
-import { getToken } from "@/axios/Authorization";
+import request from "@/api/request";
 import { UpOutlined } from "@ant-design/icons";
 import { AnimatePresence, motion } from "framer-motion";
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChatBoardMessage from "./ChatBoardMessage";
-import { Client, IFrame, IMessage } from "@stomp/stompjs";
+import { Client, IMessage } from "@stomp/stompjs";
 import useApp from "antd/es/app/useApp";
-import { Button } from "antd";
 
 interface defineProps {
   topicId: string;
@@ -38,7 +36,7 @@ export default function ChatBoard({ topicId }: defineProps) {
     if (!client || !inputValue.trim()) {
       return;
     }
-    await service
+    await request
       .post("/api/chat/send", {
         content: inputValue.trim(),
         topicId: topicId,
@@ -75,7 +73,7 @@ export default function ChatBoard({ topicId }: defineProps) {
     accountId: number
   ): Promise<UserInfo | undefined> => {
     try {
-      const res = await service.get(`/api/user/info/by_user_id`, {
+      const res = await request.get(`/api/user/info/by_user_id`, {
         params: {
           user_id: accountId,
         },
@@ -92,7 +90,7 @@ export default function ChatBoard({ topicId }: defineProps) {
   };
 
   const fetchMessages = async () => {
-    await service
+    await request
       .get("/api/chat/info/history", {
         params: {
           topic_id: topicId,

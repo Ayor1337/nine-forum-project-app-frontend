@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import service from "@/axios";
+import { getUserInfoById } from "@/api/user";
 import SpaceBanner from "./props/SpaceBanner";
 import { useAuth } from "@/components/AuthProvider";
 import StatisticsWrapper from "./props/StatisticsWrapper";
@@ -14,17 +14,11 @@ export default function SpaceWrapper({ user_id }: { user_id: string }) {
   const { currentUser } = useAuth();
 
   const fetchUserInfoById = async () => {
-    await service
-      .get(`/api/user/info/by_user_id`, {
-        params: {
-          user_id: user_id,
-        },
-      })
-      .then((res) => {
-        if (res.data.code == 200) {
-          setUserInfo(res.data.data);
-        }
-      });
+    await getUserInfoById(user_id).then((res) => {
+      if (res.data.code == 200) {
+        setUserInfo(res.data.data);
+      }
+    });
   };
 
   useEffect(() => {

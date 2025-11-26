@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Breadcrumb } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import service from "@/axios";
+import request from "@/api/request";
 
 const SEGMENT_ALIAS: Record<string, string> = {
   forum: "论坛",
@@ -31,7 +31,7 @@ export default function ForumBreadcrumb() {
   const [threadTitle, setThreadTitle] = useState<string>();
 
   const fetchTopicTitle = useCallback(async (topicId: number) => {
-    const res = await service.get(`/api/bread/info/topic_bread`, {
+    const res = await request.get(`/api/bread/info/topic_bread`, {
       params: {
         topic_id: topicId,
       },
@@ -44,7 +44,7 @@ export default function ForumBreadcrumb() {
   }, []);
 
   const fetchThreadTitle = useCallback(async (threadId: number) => {
-    const res = await service.get(`/api/bread/info/thread_bread`, {
+    const res = await request.get(`/api/bread/info/thread_bread`, {
       params: {
         thread_id: threadId,
       },

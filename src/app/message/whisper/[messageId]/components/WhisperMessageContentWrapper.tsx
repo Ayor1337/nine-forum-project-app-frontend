@@ -1,14 +1,14 @@
 "use client";
 
-import service from "@/axios";
-import { getToken } from "@/axios/Authorization";
+import request from "@/api/request";
+import { getToken } from "@/api/utils/auth";
 import { useAuth } from "@/components/AuthProvider";
 import { Client, IMessage } from "@stomp/stompjs";
 import useApp from "antd/es/app/useApp";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./scroll.css";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { getImageUrl } from "@/axios/ImageService";
+import { getImageUrl } from "@/api/utils/image";
 import { Image } from "antd";
 import { ChatMessage } from "./chat";
 import { formatSmartTime } from "@/func/DateConvert";
@@ -48,7 +48,7 @@ export default function WhisperMessageContentWrapper({
     if (conversationId == null || conversationId == 0) {
       return;
     }
-    await service
+    await request
       .post("/api/conversation/send", {
         conversationId: conversationId,
         content: content,
@@ -78,7 +78,7 @@ export default function WhisperMessageContentWrapper({
 
   const fetchConversationHistory = useCallback(
     async (pageNo: number) => {
-      const res = await service.get("/api/conversation/message/list", {
+      const res = await request.get("/api/conversation/message/list", {
         params: { conversationId, page_num: pageNo },
       });
 

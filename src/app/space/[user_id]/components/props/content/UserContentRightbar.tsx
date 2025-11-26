@@ -1,5 +1,5 @@
-import service from "@/axios";
-import { getImageUrl } from "@/axios/ImageService";
+import request from "@/api/request";
+import { getImageUrl } from "@/api/utils/image";
 import { Card, Avatar, Divider } from "antd";
 import { useEffect, useState } from "react";
 
@@ -11,7 +11,7 @@ export default function UserContentRightbar({ userId }: defineProps) {
   const [userInfo, setUserInfo] = useState<UserInfo>();
 
   const fetchUserInfo = async () => {
-    await service
+    await request
       .get(`/api/user/info/by_user_id`, {
         params: {
           user_id: userId,

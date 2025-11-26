@@ -1,9 +1,9 @@
-import service from "@/axios";
+import request from "@/api/request";
 import {
   convertImageToBase64,
   getBase64WithType,
   getImageUrl,
-} from "@/axios/ImageService";
+} from "@/api/utils/image";
 import {
   CheckOutlined,
   DeleteOutlined,
@@ -69,7 +69,7 @@ export default function TopicCard({ topic, hanldeRefresh }: defineProps) {
   };
 
   const deleteTopic = async () => {
-    await service
+    await request
       .delete(`/api/topic/delete`, {
         params: {
           topic_id: topic.topicId,

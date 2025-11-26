@@ -3,6 +3,7 @@ type getTokenResult = string | null;
 const TOKEN_KEY = "Authorization";
 
 const getToken = (): getTokenResult => {
+  if (typeof window === "undefined") return null;
   const strToken =
     localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
 

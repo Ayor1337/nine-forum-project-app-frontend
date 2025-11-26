@@ -4,9 +4,9 @@ import { Button, Card } from "antd";
 import Link from "next/link";
 import "@ant-design/v5-patch-for-react-19";
 import Footer from "@/components/ui/Footer";
-import { getImageUrl } from "@/axios/ImageService";
+import { getImageUrl } from "@/api/utils/image";
 import { useRouter } from "next/navigation";
-import service from "@/axios";
+import request from "@/api/request";
 import { 
   CommentOutlined, 
   CloudDownloadOutlined, 
@@ -19,7 +19,7 @@ export default function Home() {
   const router = useRouter();
 
   const handleEnter = async () => {
-    await service
+    await request
       .get("/")
       .then((res) => {
         router.push("/forum");

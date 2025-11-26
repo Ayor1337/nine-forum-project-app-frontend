@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack -p 10071",
     "build": "next build --turbopack --no-lint",
     "start": "next start -p 80",
     "lint": "eslint"
@@ -19,6 +19,7 @@
     "chromadb": "^3.1.0",
     "dayjs": "^1.11.18",
     "framer-motion": "12.23.12",
+    "lucide-react": "^0.555.0",
     "next": "15.5.2",
     "quill": "2.0.3",
     "quill-delta-to-html": "0.12.1",

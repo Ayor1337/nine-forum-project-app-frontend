@@ -1,5 +1,5 @@
-import service from "@/axios";
-import { getImageUrl } from "@/axios/ImageService";
+import request from "@/api/request";
+import { getImageUrl } from "@/api/utils/image";
 import { CloseOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
@@ -17,7 +17,7 @@ export default function ConversationTabs({
   const [active, setActive] = useState<number>(activeKey ? activeKey : 0);
 
   const hideConversation = async (id: number) => {
-    await service
+    await request
       .post(
         "/api/conversation/hide",
         {},

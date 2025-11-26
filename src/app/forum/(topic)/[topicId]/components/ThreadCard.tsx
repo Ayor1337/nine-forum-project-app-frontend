@@ -1,6 +1,6 @@
 "use client";
 
-import service from "@/axios";
+import request from "@/api/request";
 import { Button, Divider, Skeleton } from "antd";
 import {
   forwardRef,
@@ -10,103 +10,87 @@ import {
   useState,
 } from "react";
 import ThreadItem from "./ThreadItem";
+import PosterTool from "./PosterTool";
 
 interface defineProps {
   topicId: number;
 }
 
-export interface ThreadWrapperRef {
-  refresh: () => Promise<void>;
-}
+export default function ThreadCard({ topicId }: defineProps) {
+  const PAGE_SIZE = 10;
 
-const ThreadCard = forwardRef<ThreadWrapperRef, defineProps>(
-  ({ topicId }, ref) => {
-    const PAGE_SIZE = 10;
+  const [threadList, setThreadList] = useState<PageEntity<Thread>>();
+  const [isFetching, setFetching] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(1);
 
-    const [threadList, setThreadList] = useState<PageEntity<Thread>>();
-    const [isFetching, setFetching] = useState<boolean>(true);
-    const [page, setPage] = useState<number>(1);
+  const fetchThreadsByTopicId = useCallback(async (topicId: number) => {
+    await request
+      .get(`/api/thread/info/topic`, {
+        params: {
+          topic_id: topicId,
+          page_num: page,
+          page_size: PAGE_SIZE,
+        },
+      })
+      .then((res) => {
+        if (res.data.code == 200) {
+          console.log(res.data.data);
 
-    const fetchThreadsByTopicId = useCallback(async (topicId: number) => {
-      await service
-        .get(`/api/thread/info/topic`, {
-          params: {
-            topic_id: topicId,
-            page_num: page,
-            page_size: PAGE_SIZE,
-          },
-        })
-        .then((res) => {
-          if (res.data.code == 200) {
-            console.log(res.data.data);
+          setThreadList(res.data.data);
+          setFetching(false);
+        }
+      });
+  }, []);
 
-            setThreadList(res.data.data);
-            setFetching(false);
-          }
-        });
-    }, []);
+  useEffect(() => {
+    if (!isNaN(Number(topicId))) {
+      fetchThreadsByTopicId(topicId);
+    }
+  }, []);
 
-    const refreshHandler = useCallback(async () => {
-      const idNum = Number(topicId);
-      if (!isNaN(idNum)) {
-        await Promise.all([fetchThreadsByTopicId(idNum)]);
-      }
-    }, [topicId, fetchThreadsByTopicId]);
-
-    useImperativeHandle(
-      ref,
-      () => ({
-        refresh: refreshHandler,
-      }),
-      [refreshHandler]
-    );
-
-    useEffect(() => {
-      if (!isNaN(Number(topicId))) {
-        fetchThreadsByTopicId(topicId);
-      }
-    }, []);
-
-    return (
-      <>
-        {/* Content Start */}
-        <div className="rounded-xl border border-black/5 bg-white shadow-sm transition">
-          {/* Filter Start */}
-          <div className="flex gap-2 px-3 pb-2 pt-2">
-            <div className="!px-2 link">热门</div>
-            <div className="!px-2 link">最新</div>
-          </div>
-          {/* Filter End */}
-
-          <div className="flex flex-col">
-            {/* Content Card Start */}
-            {isFetching ? (
-              <ThreadItemSkeleton />
-            ) : (
-              threadList?.data.map((tm) => (
-                <div key={tm.threadId}>
-                  <ThreadItem thread={tm} />
-                  <div className="px-4">
-                    <Divider size="small" />
-                  </div>
-                </div>
-              ))
-            )}
-            {/* Content Card End */}
-            {threadList && threadList.data.length == 0 && (
-              <div className="flex justify-center items-center">
-                <div className="py-10">该主题还是空的, 请发送第一个帖子</div>
-              </div>
-            )}
-          </div>
+  return (
+    <>
+      {/* Content Start */}
+      <div className="rounded-xl border border-black/5 bg-white shadow-sm transition">
+        <div className="fixed -translate-x-15 top-80 z-99">
+          <PosterTool
+            topicId={topicId.toString()}
+            refresh={() => fetchThreadsByTopicId(topicId)}
+          />
         </div>
-        {/* Content End */}
-      </>
-    );
-  }
-);
+        {/* Filter Start */}
+        <div className="flex gap-2 px-3 pb-2 pt-2">
+          <div className="!px-2 link">热门</div>
+          <div className="!px-2 link">最新</div>
+        </div>
+        {/* Filter End */}
 
-export default ThreadCard;
+        <div className="flex flex-col">
+          {/* Content Card Start */}
+          {isFetching ? (
+            <ThreadItemSkeleton />
+          ) : (
+            threadList?.data.map((tm) => (
+              <div key={tm.threadId}>
+                <ThreadItem thread={tm} />
+                <div className="px-4">
+                  <Divider size="small" />
+                </div>
+              </div>
+            ))
+          )}
+          {/* Content Card End */}
+          {threadList && threadList.data.length == 0 && (
+            <div className="flex justify-center items-center">
+              <div className="py-10">该主题还是空的, 请发送第一个帖子</div>
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Content End */}
+    </>
+  );
+}
 
 function ThreadItemSkeleton() {
   return (

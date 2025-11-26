@@ -1,6 +1,6 @@
 "use client";
 
-import service from "@/axios";
+import { register, registerVerify } from "@/api/auth";
 import { MailOutlined } from "@ant-design/icons";
 import { Client, IMessage } from "@stomp/stompjs";
 import { Button, Form, Input, Result, Steps } from "antd";
@@ -28,39 +28,33 @@ export default function RegisterPage() {
       title: "注册",
     },
   ];
-  const registerVerify = async (values: any) => {
-    await service
-      .post("/api/auth/register_verify", {
-        email: values.email,
-      })
-      .then((res) => {
-        if (res.data.code == 200) {
-          setUuid(res.data.data);
-          setCurrent(1);
-        }
-      });
+  const handleRegisterVerify = async (values: any) => {
+    await registerVerify(values.email).then((res) => {
+      if (res.data.code == 200) {
+        setUuid(res.data.data);
+        setCurrent(1);
+      }
+    });
   };
 
-  const register = async (values: any) => {
+  const handleRegister = async (values: any) => {
     if (token == null || token == "") {
       return;
     }
-    await service
-      .post("/api/auth/register", {
-        username: values.username,
-        nickname: values.nickname,
-        password: values.password,
-        email: values.email,
-        token: token,
-      })
-      .then((res) => {
-        if (res.data.code == 200) {
-          message.success("注册成功");
-          router.push("/login");
-        } else {
-          message.warning(res.data.message);
-        }
-      });
+    await register({
+      username: values.username,
+      nickname: values.nickname,
+      password: values.password,
+      email: values.email,
+      token: token,
+    }).then((res) => {
+      if (res.data.code == 200) {
+        message.success("注册成功");
+        router.push("/login");
+      } else {
+        message.warning(res.data.message);
+      }
+    });
   };
 
   useEffect(() => {
@@ -95,7 +89,7 @@ export default function RegisterPage() {
       {current == 0 && (
         <div className="flex-4/5 w-full">
           <div className="text-4xl text-center mb-5">注册</div>
-          <Form className="w-full" onFinish={registerVerify}>
+          <Form className="w-full" onFinish={handleRegisterVerify}>
             <Form.Item
               name="email"
               rules={[
@@ -135,7 +129,7 @@ export default function RegisterPage() {
         <div className="flex-4/5 w-full">
           <Form
             className="w-full"
-            onFinish={register}
+            onFinish={handleRegister}
             labelCol={{ span: 4 }}
             labelAlign="right"
           >

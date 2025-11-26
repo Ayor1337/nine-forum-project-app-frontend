@@ -2,7 +2,7 @@ import { Input } from "antd";
 import { useEffect, useState } from "react";
 import NewTopicCard from "./NewTopicCard";
 import { CheckOutlined } from "@ant-design/icons";
-import service from "@/axios";
+import request from "@/api/request";
 import useApp from "antd/es/app/useApp";
 
 interface defineProps {
@@ -18,7 +18,7 @@ export default function NewThemeCard({ handleRefresh }: defineProps) {
     if (title == "新主题") {
       message.warning("请输入新的主题后再添加");
     } else {
-      await service
+      await request
         .put("/api/theme/insert", {
           title: title,
         })

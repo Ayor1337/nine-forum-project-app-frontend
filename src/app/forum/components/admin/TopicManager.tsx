@@ -1,4 +1,4 @@
-import service from "@/axios";
+import request from "@/api/request";
 import { Drawer } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import ThemeCard from "./ThemeCard";
@@ -14,7 +14,7 @@ export default function TopicManager({ isOpen, closeDraw }: defineProps) {
   const [themeTopics, setThemeTopics] = useState<Array<ThemeTopic>>();
 
   const fetchThemeTopicList = useCallback(async () => {
-    await service.get("/api/theme/list_themes_contains_topics").then((res) => {
+    await request.get("/api/theme/list_themes_contains_topics").then((res) => {
       if (res.data.code == 200) {
         setThemeTopics(res.data.data);
       }

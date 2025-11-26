@@ -1,6 +1,6 @@
 "use client";
 
-import service from "@/axios";
+import request from "@/api/request";
 import { Avatar, Divider, Popconfirm } from "antd";
 import {
   forwardRef,
@@ -12,7 +12,7 @@ import {
 import { formatDate } from "@/func/DateConvert";
 import PostItem from "./PostItem";
 import { quillToHTML } from "@/func/QuillToHTML";
-import { getImageUrl } from "@/axios/ImageService";
+import { getImageUrl } from "@/api/utils/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   DeleteOutlined,
@@ -47,7 +47,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
     const { message } = useApp();
 
     const fetchThreadById = useCallback(async (threadId: number) => {
-      await service
+      await request
         .get(`/api/thread/info`, {
           params: {
             thread_id: threadId,
@@ -61,7 +61,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
     }, []);
 
     const fetchPostsByThreadId = useCallback(async (threadId: number) => {
-      await service
+      await request
         .get(`/api/post/info/thread`, {
           params: {
             thread_id: threadId,
@@ -75,7 +75,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
     }, []);
 
     const likeThread = async () => {
-      await service
+      await request
         .post(
           `/api/like/like_thread`,
           {},
@@ -96,7 +96,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
     };
 
     const collectThread = async () => {
-      await service
+      await request
         .post(
           `/api/collect/collect_thread`,
           {},
@@ -117,7 +117,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
     };
 
     const unlikeThread = async () => {
-      await service
+      await request
         .post(
           `/api/like/unlike_thread`,
           {},
@@ -138,7 +138,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
     };
 
     const uncollectThread = async () => {
-      await service
+      await request
         .post(
           `/api/collect/uncollect_thread`,
           {},
@@ -157,7 +157,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
     };
 
     const fetchIsLikeByThreadId = async () => {
-      await service
+      await request
         .get(`/api/like/info/is_like`, {
           params: {
             thread_id: threadId,
@@ -171,7 +171,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
     };
 
     const fetchIsCollectByThreadId = async () => {
-      await service
+      await request
         .get(`/api/collect/info/is_collect`, {
           params: {
             thread_id: threadId,
@@ -185,7 +185,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
     };
 
     const fetchLikeCountByThreadId = async () => {
-      await service
+      await request
         .get(`/api/like/info/get_like_count`, {
           params: {
             thread_id: threadId,
@@ -199,7 +199,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
     };
 
     const fetchCollectCountByThreadId = async () => {
-      await service
+      await request
         .get(`/api/collect/info/get_collect_count`, {
           params: {
             thread_id: threadId,
@@ -211,7 +211,7 @@ const PostCard = forwardRef<PostWrapperRef, DefineProps>(
     };
 
     const removeThread = async () => {
-      await service
+      await request
         .delete(`/api/thread/remove_thread`, {
           params: {
             thread_id: threadId,

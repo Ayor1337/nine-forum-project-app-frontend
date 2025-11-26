@@ -1,6 +1,6 @@
 "use client";
 
-import { getImageUrl } from "@/axios/ImageService";
+import { getImageUrl } from "@/api/utils/image";
 import { formatDate } from "@/func/DateConvert";
 import { quillToHTML } from "@/func/QuillToHTML";
 import { Image, Tag } from "antd";
