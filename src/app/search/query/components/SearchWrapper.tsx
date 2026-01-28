@@ -17,20 +17,6 @@ interface Query {
   endTime?: number | null;
   order?: string;
 }
-import { useRouter } from "next/navigation";
-import { Card, Space, Radio, Select, DatePicker, Checkbox } from "antd";
-import dayjs, { Dayjs } from "dayjs";
-
-interface Query {
-  query: string;
-  topicId?: number;
-  enableHistory?: boolean;
-  onlyThreadTopic?: boolean;
-  pageNum?: number;
-  startTime?: number | null;
-  endTime?: number | null;
-  order?: string;
-}
 
 interface defineProps {
   param: SearchParams;
@@ -75,7 +61,6 @@ export default function SearchWrapper({ param }: defineProps) {
     if (!query) {
       return;
     }
-    router.push(`/search/query?${buildQueryString()}`);
     router.push(`/search/query?${buildQueryString()}`);
   };
 
@@ -131,16 +116,7 @@ export default function SearchWrapper({ param }: defineProps) {
 
   useEffect(() => {
     getThreadByKeyword();
-    getThreadByKeyword();
   }, [param]);
-
-  useEffect(() => {
-    if (query.query != param.q) {
-      return;
-    } else {
-      router.push(`/search/query?` + buildQueryString());
-    }
-  }, [query]);
 
   useEffect(() => {
     if (query.query != param.q) {
@@ -160,10 +136,6 @@ export default function SearchWrapper({ param }: defineProps) {
             onChange={(e) =>
               setQuery((query) => ({ ...query, query: e.target.value }))
             }
-            value={query.query}
-            onChange={(e) =>
-              setQuery((query) => ({ ...query, query: e.target.value }))
-            }
             className="border-0 ring-0 outline-none py-3 px-5 w-300 bg-neutral-100 rounded-3xl"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -175,15 +147,8 @@ export default function SearchWrapper({ param }: defineProps) {
         <div className="flex w-full mt-5">
           <div className="flex flex-4/5 flex-col divide-y-1  w-full px-3 divider-y-1 divide-slate-500/10">
             {results && results.totalSize > 0 ? (
-            {results && results.totalSize > 0 ? (
               results.data.map((item, index) => (
                 <SearchResultCard key={index} thread={item} />
-              ))
-            ) : (
-              <div className="size-full text-2xl flex justify-center items-center">
-                什么也没搜到捏
-              </div>
-            )}
               ))
             ) : (
               <div className="size-full text-2xl flex justify-center items-center">
@@ -193,7 +158,6 @@ export default function SearchWrapper({ param }: defineProps) {
           </div>
           <div className="flex flex-col flex-1/5 gap-3">
             <div className="sticky top-5">
-              <Selector query={query} setQuery={setQuery} />
               <Selector query={query} setQuery={setQuery} />
             </div>
           </div>
@@ -263,8 +227,6 @@ function Selector({
       setRangeValue([dayjs(start), dayjs(end)]);
     }
 
-    // 同步初始化 DatePicker
-
     setInitTime(true);
   };
 
@@ -275,9 +237,7 @@ function Selector({
   useEffect(() => {
     if (!initTime) {
       initlizeTime();
-
       setInitTime(true);
-
       return;
     }
 
@@ -313,19 +273,11 @@ function Selector({
 
   return (
     <div className="flex flex-col gap-3">
-    <div className="flex flex-col gap-3">
       {/* 卡片 1：时间筛选 */}
       <Card
         className="!bg-slate-50 shadow-2xs"
-        className="!bg-slate-50 shadow-2xs"
         title={<span className="text-slate-700">时间筛选</span>}
       >
-        <Space direction="vertical" className="w-full">
-          <Select
-            className="w-full"
-            placeholder="选择时间"
-            value={time}
-            onChange={setTime}
         <Space direction="vertical" className="w-full">
           <Select
             className="w-full"
@@ -364,18 +316,9 @@ function Selector({
       {/* 卡片 2：主题 / 板块筛选 */}
       <Card
         className="!bg-slate-50 shadow-2xs"
-        className="!bg-slate-50 shadow-2xs"
         title={<span className="text-slate-700">主题分类</span>}
       >
         <Space direction="vertical" style={{ width: "100%" }}>
-          <Checkbox
-            checked={query.onlyThreadTopic}
-            onChange={(e) =>
-              setQuery((q) => ({ ...q, onlyThreadTopic: e.target.checked }))
-            }
-          >
-            只看主题帖
-          </Checkbox>
           <Checkbox
             checked={query.onlyThreadTopic}
             onChange={(e) =>
@@ -389,11 +332,7 @@ function Selector({
             placeholder="选择主题"
             value={query.topicId}
             onChange={(e) => setQuery((q) => ({ ...q, topicId: e }))}
-            value={query.topicId}
-            onChange={(e) => setQuery((q) => ({ ...q, topicId: e }))}
             allowClear
-            options={topicOptions}
-          ></Select>
             options={topicOptions}
           ></Select>
         </Space>
@@ -401,7 +340,6 @@ function Selector({
 
       {/* 卡片 3：排序方式 */}
       <Card
-        className="!bg-slate-50 shadow-2xs"
         className="!bg-slate-50 shadow-2xs"
         title={<span className="text-slate-700">排序方式</span>}
       >
@@ -411,26 +349,19 @@ function Selector({
             value={query.order}
             onChange={(e) => setQuery((q) => ({ ...q, order: e.target.value }))}
             defaultValue={null}
-            value={query.order}
-            onChange={(e) => setQuery((q) => ({ ...q, order: e.target.value }))}
-            defaultValue={null}
           >
-            <Radio value={null} className="text-[12px]">
             <Radio value={null} className="text-[12px]">
               按相关度
             </Radio>
             <Radio value="desc" className="text-[12px]">
-            <Radio value="desc" className="text-[12px]">
               按时间（最新优先）
             </Radio>
-            <Radio value="asc" className="text-[12px]">
             <Radio value="asc" className="text-[12px]">
               按时间（最早优先）
             </Radio>
           </Radio.Group>
         </Space>
       </Card>
-    </div>
     </div>
   );
 }
