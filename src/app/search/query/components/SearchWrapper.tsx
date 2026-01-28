@@ -48,13 +48,14 @@ export default function SearchWrapper({ param }: defineProps) {
   const [results, setResults] = useState<PageEntity<ThreadDoc>>();
   const router = useRouter();
   const [query, setQuery] = useState<Query>(() => ({
-    query: param.q,
-    onlyThreadTopic: param.onlyThreadTopic,
+    query: param.q || "",
+    onlyThreadTopic: param.onlyThreadTopic || false,
     enableHistory: param.enableHistory,
     topicId: param.topicId,
     pageNum: param.page,
     startTime: normalizeToMilliseconds(param.startTime),
     endTime: normalizeToMilliseconds(param.endTime),
+    order: param.order,
   }));
 
   const handleSearch = () => {
@@ -104,7 +105,7 @@ export default function SearchWrapper({ param }: defineProps) {
       .map((key) => {
         const v = (normalizedQuery as any)[key];
 
-        if (v === undefined || v === null) return "";
+        if (v === undefined || v === null || v === "") return "";
         if (typeof v === "boolean" && v === false) return "";
 
         const targetKey = map[key as keyof typeof map];
@@ -346,11 +347,10 @@ function Selector({
         <Space direction="vertical" style={{ width: "100%" }}>
           <Radio.Group
             className="w-full flex flex-col gap-1"
-            value={query.order}
+            value={query.order ?? ""}
             onChange={(e) => setQuery((q) => ({ ...q, order: e.target.value }))}
-            defaultValue={null}
           >
-            <Radio value={null} className="text-[12px]">
+            <Radio value="" className="text-[12px]">
               按相关度
             </Radio>
             <Radio value="desc" className="text-[12px]">
