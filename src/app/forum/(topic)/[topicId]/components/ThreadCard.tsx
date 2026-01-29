@@ -22,6 +22,20 @@ export default function ThreadCard({ topicId }: defineProps) {
   const [threadList, setThreadList] = useState<PageEntity<Thread>>();
   const [isFetching, setFetching] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
+  const [tagOptions, setTagOptions] = useState<{ value: number; label: string }[]>([]);
+
+  const fetchTopicTags = useCallback(async () => {
+    const res = await request.get("/api/tag/info/list_by_topic", {
+      params: { topic_id: topicId },
+    });
+    if (res.data.code === 200) {
+      const list = res.data.data.map((t: Tag) => ({
+        value: t.tagId,
+        label: t.tag,
+      }));
+      setTagOptions(list);
+    }
+  }, [topicId]);
 
   const fetchThreadsByTopicId = useCallback(async (topicId: number) => {
     await request
@@ -45,8 +59,9 @@ export default function ThreadCard({ topicId }: defineProps) {
   useEffect(() => {
     if (!isNaN(Number(topicId))) {
       fetchThreadsByTopicId(topicId);
+      fetchTopicTags();
     }
-  }, []);
+  }, [topicId, fetchThreadsByTopicId, fetchTopicTags]);
 
   return (
     <>
@@ -72,7 +87,11 @@ export default function ThreadCard({ topicId }: defineProps) {
           ) : (
             threadList?.data.map((tm) => (
               <div key={tm.threadId}>
-                <ThreadItem thread={tm} />
+                <ThreadItem 
+                  thread={tm} 
+                  tagOptions={tagOptions} 
+                  refreshTags={fetchTopicTags}
+                />
                 <div className="px-4">
                   <Divider size="small" />
                 </div>

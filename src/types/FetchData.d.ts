@@ -62,15 +62,12 @@ interface Thread {
   tag: Tag;
 }
 
-interface UserMessage {
-  userInfo: UserInfo;
-  message: ChatboardHistory;
-}
-
 interface ChatboardHistory {
   chatboardHistoryId: number;
   accountId: number;
-  username: string;
+  nickname: string;
+  avatarUrl: string;
+  bannerUrl: string;
   topicId: number;
   content: string;
   createTime: Date;

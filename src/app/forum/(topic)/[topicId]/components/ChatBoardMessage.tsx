@@ -3,17 +3,17 @@ import { formatDate } from "@/func/DateConvert";
 import { Button } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef, useState, memo } from "react";
 
 interface defineProps {
-  userMessage: UserMessage;
+  chatboardHistory: ChatboardHistory;
   disabled: boolean;
 }
 
-export default function ChatBoardMessage({
-  userMessage,
+const ChatBoardMessage = ({
+  chatboardHistory,
   disabled,
-}: defineProps) {
+}: defineProps) => {
   const [isAvatarHover, serAvatarHover] = useState(false);
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
@@ -49,7 +49,7 @@ export default function ChatBoardMessage({
             }}
             transition={{ duration: 0.2 }}
             className="size-7 z-5 rounded-full border border-white bg-blue-300 origin-top-left"
-            src={getImageUrl(userMessage.userInfo.avatarUrl)}
+            src={getImageUrl(chatboardHistory.avatarUrl)}
           />
           <motion.img
             animate={{
@@ -58,7 +58,7 @@ export default function ChatBoardMessage({
             }}
             transition={{ duration: 0.1 }}
             className="absolute right-0 top-0 object-cover -z-1 opacity-45 mask-l-from-20%"
-            src={getImageUrl(userMessage.userInfo.bannerUrl)}
+            src={getImageUrl(chatboardHistory.bannerUrl)}
           />
           <motion.div
             animate={{
@@ -68,7 +68,7 @@ export default function ChatBoardMessage({
             transition={{ duration: 0.22 }}
             className="absolute top-1/2  -translate-y-1/2 font-bold pointer-events-none"
           >
-            {userMessage.userInfo.nickname}
+            {chatboardHistory.nickname}
           </motion.div>
           <motion.div
             animate={{
@@ -81,7 +81,7 @@ export default function ChatBoardMessage({
             <Button
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/space/${userMessage.userInfo.accountId}`);
+                router.push(`/space/${chatboardHistory.accountId}`);
               }}
             >
               前往主页
@@ -89,16 +89,18 @@ export default function ChatBoardMessage({
           </motion.div>
         </motion.div>
         <div className="truncate z-4 absolute left-10 ml-2 pointer-events-none">
-          {userMessage.message.content}
+          {chatboardHistory.content}
         </div>
         <motion.div
           key="time"
           animate={{ opacity: isAvatarHover ? 0 : 1 }}
           className="absolute right-5 text-xs top-1/2 -translate-y-1/2"
         >
-          {formatDate(userMessage.message.createTime)}
+          {formatDate(chatboardHistory.createTime)}
         </motion.div>
       </motion.div>
     </AnimatePresence>
   );
 }
+
+export default memo(ChatBoardMessage);

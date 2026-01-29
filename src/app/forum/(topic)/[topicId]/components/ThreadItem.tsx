@@ -16,7 +16,15 @@ import {
 import React from "react";
 import SwipeableRow from "@/components/ui/SwipeableCard";
 
-export default function ThreadItem({ thread }: { thread: Thread }) {
+export default function ThreadItem({
+  thread,
+  tagOptions,
+  refreshTags,
+}: {
+  thread: Thread;
+  tagOptions: { value: number; label: string }[];
+  refreshTags: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { permissionVerify } = useAuth();
@@ -25,7 +33,13 @@ export default function ThreadItem({ thread }: { thread: Thread }) {
     <div>
       <SwipeableRow
         actions={
-          <EditTool thread={thread} topicId={thread.topicId} tag={thread.tag} />
+          <EditTool
+            thread={thread}
+            topicId={thread.topicId}
+            tag={thread.tag}
+            options={tagOptions}
+            refresh={refreshTags}
+          />
         }
         actionWidth={300}
         canSwipe={permissionVerify("", thread.topicId)}
